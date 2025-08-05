@@ -1,9 +1,19 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Megaphone, Calendar, User, AlertCircle, Info, CheckCircle } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+
+interface Comunicado {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+  type: 'info' | 'warning' | 'important' | 'success';
+  author: string;
+}
 
 const Comunicados = () => {
-  const comunicados = [
+  const [comunicados] = useLocalStorage<Comunicado[]>('comunicados', [
     {
       id: 1,
       title: "Manutenção dos Elevadores",
@@ -44,7 +54,7 @@ const Comunicados = () => {
       type: "info",
       author: "Comissão Verde"
     }
-  ];
+  ]);
 
   const getIcon = (type: string) => {
     switch (type) {

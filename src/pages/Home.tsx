@@ -79,6 +79,19 @@ const Home = () => {
           })}
         </div>
       </div>
+
+      {/* Admin Access */}
+      <div className="p-6 pt-0">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            onClick={() => navigate("/admin/login")}
+            variant="outline"
+            className="w-full text-xs text-muted-foreground border-dashed"
+          >
+            Acesso Administrativo
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,20 +1,19 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Package, User, MapPin, Calendar, Plus } from "lucide-react";
-import { useState } from "react";
+import { Package, User, MapPin, Calendar } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+
+interface Encomenda {
+  id: number;
+  name: string;
+  apartment: string;
+  description: string;
+  date: string;
+  collected: boolean;
+}
 
 const Encomendas = () => {
-  const [isAdmin] = useState(false); // Simula se é admin ou não
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newPackage, setNewPackage] = useState({
-    name: "",
-    apartment: "",
-    description: ""
-  });
-
-  const [packages] = useState([
+  const [packages] = useLocalStorage<Encomenda[]>('encomendas', [
     {
       id: 1,
       name: "Maria Silva",
@@ -44,78 +43,18 @@ const Encomendas = () => {
   const pendingPackages = packages.filter(pkg => !pkg.collected);
   const collectedPackages = packages.filter(pkg => pkg.collected);
 
-  const handleAddPackage = () => {
-    // Aqui seria adicionado o pacote à lista
-    console.log("Novo pacote:", newPackage);
-    setNewPackage({ name: "", apartment: "", description: "" });
-    setShowAddForm(false);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation title="Encomendas" />
       
       <div className="p-6 space-y-6">
-        {/* Header com botão admin */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-semibold">Encomendas Recebidas</h2>
-            <p className="text-muted-foreground">
-              {pendingPackages.length} encomenda{pendingPackages.length !== 1 ? 's' : ''} aguardando retirada
-            </p>
-          </div>
-          
-          {isAdmin && (
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="bg-condo-blue hover:bg-condo-blue/90"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar
-            </Button>
-          )}
+        {/* Header */}
+        <div>
+          <h2 className="text-xl font-semibold">Encomendas Recebidas</h2>
+          <p className="text-muted-foreground">
+            {pendingPackages.length} encomenda{pendingPackages.length !== 1 ? 's' : ''} aguardando retirada
+          </p>
         </div>
-
-        {/* Formulário para adicionar (apenas admin) */}
-        {isAdmin && showAddForm && (
-          <Card className="p-6 shadow-card border-0">
-            <h3 className="text-lg font-semibold mb-4">Nova Encomenda</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Nome do Morador</label>
-                <Input
-                  value={newPackage.name}
-                  onChange={(e) => setNewPackage({...newPackage, name: e.target.value})}
-                  placeholder="Ex: Maria Silva"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Apartamento</label>
-                <Input
-                  value={newPackage.apartment}
-                  onChange={(e) => setNewPackage({...newPackage, apartment: e.target.value})}
-                  placeholder="Ex: 101"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Descrição</label>
-                <Input
-                  value={newPackage.description}
-                  onChange={(e) => setNewPackage({...newPackage, description: e.target.value})}
-                  placeholder="Ex: Caixa pequena - Correios"
-                />
-              </div>
-              <div className="flex gap-3">
-                <Button onClick={handleAddPackage} className="bg-condo-green hover:bg-condo-green/90">
-                  Adicionar Encomenda
-                </Button>
-                <Button variant="outline" onClick={() => setShowAddForm(false)}>
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Encomendas Pendentes */}
         {pendingPackages.length > 0 && (
