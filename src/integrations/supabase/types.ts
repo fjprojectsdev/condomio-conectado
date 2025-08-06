@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coleta_lixo: {
+        Row: {
+          created_at: string
+          dia_da_semana: string
+          id: string
+          tipo_de_lixo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dia_da_semana: string
+          id?: string
+          tipo_de_lixo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dia_da_semana?: string
+          id?: string
+          tipo_de_lixo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comunicados: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          mensagem: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          id?: string
+          mensagem: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          mensagem?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      encomendas: {
+        Row: {
+          apartamento: number
+          created_at: string
+          descricao: string
+          id: string
+          nome_morador: string
+          recebida: boolean
+          updated_at: string
+        }
+        Insert: {
+          apartamento: number
+          created_at?: string
+          descricao: string
+          id?: string
+          nome_morador: string
+          recebida?: boolean
+          updated_at?: string
+        }
+        Update: {
+          apartamento?: number
+          created_at?: string
+          descricao?: string
+          id?: string
+          nome_morador?: string
+          recebida?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      servicos_moradores: {
+        Row: {
+          apartamento: number
+          created_at: string
+          id: string
+          nome_morador: string
+          status: string
+          tipo_servico: string
+          updated_at: string
+        }
+        Insert: {
+          apartamento: number
+          created_at?: string
+          id?: string
+          nome_morador: string
+          status?: string
+          tipo_servico: string
+          updated_at?: string
+        }
+        Update: {
+          apartamento?: number
+          created_at?: string
+          id?: string
+          nome_morador?: string
+          status?: string
+          tipo_servico?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
