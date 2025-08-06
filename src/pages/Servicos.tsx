@@ -3,72 +3,130 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wrench, User, Phone, MapPin, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface ServicoMorador {
+  id: string;
+  nome_morador: string;
+  apartamento: number;
+  tipo_servico: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const Servicos = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newService, setNewService] = useState({
-    name: "",
-    apartment: "",
-    service: "",
-    phone: "",
-    description: ""
+    nome_morador: "",
+    apartamento: "",
+    tipo_servico: ""
   });
+  const [services, setServices] = useState<ServicoMorador[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "Carlos Oliveira",
-      apartment: "402",
-      service: "Encanador",
-      phone: "(11) 99999-1234",
-      description: "Reparos em geral, vazamentos, instalação de torneiras e chuveiros. Atendimento 24h para emergências.",
-      rating: 4.8
-    },
-    {
-      id: 2,
-      name: "Ana Santos",
-      apartment: "201",
-      service: "Eletricista",
-      phone: "(11) 99999-5678",
-      description: "Instalações elétricas, troca de lâmpadas, reparo em disjuntores. Trabalho com segurança e qualidade.",
-      rating: 4.9
-    },
-    {
-      id: 3,
-      name: "José Silva",
-      apartment: "105",
-      service: "Marceneiro",
-      phone: "(11) 99999-9012",
-      description: "Móveis sob medida, reparos em portas e janelas, prateleiras. Orçamento gratuito.",
-      rating: 4.7
-    },
-    {
-      id: 4,
-      name: "Maria Costa",
-      apartment: "308",
-      service: "Diarista",
-      phone: "(11) 99999-3456",
-      description: "Limpeza residencial, organização, passadoria. Disponível terças e quintas. Referências no condomínio.",
-      rating: 5.0
-    }
-  ]);
+  useEffect(() => {
+    fetchServicos();
+  }, []);
 
-  const handleAddService = () => {
-    if (newService.name && newService.apartment && newService.service && newService.phone) {
-      const service = {
-        id: Date.now(),
-        ...newService,
-        rating: 0
-      };
-      setServices([...services, service]);
-      setNewService({ name: "", apartment: "", service: "", phone: "", description: "" });
-      setShowAddForm(false);
+  const fetchServicos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('servicos_moradores')
+        .select('*')
+        .eq('status', 'ativo')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar serviços:', error);
+        return;
+      }
+
+      setServices(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar serviços:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRemoveService = (id: number) => {
-    setServices(services.filter(service => service.id !== id));
+  const handleAddService = async () => {
+    if (newService.nome_morador && newService.apartamento && newService.tipo_servico) {
+      try {
+        const { data, error } = await supabase
+          .from('servicos_moradores')
+          .insert([{
+            nome_morador: newService.nome_morador,
+            apartamento: parseInt(newService.apartamento),
+            tipo_servico: newService.tipo_servico,
+            status: 'ativo'
+          }])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Erro ao adicionar serviço:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao cadastrar serviço. Tente novamente.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setServices([data, ...services]);
+        setNewService({ nome_morador: "", apartamento: "", tipo_servico: "" });
+        setShowAddForm(false);
+        
+        toast({
+          title: "Sucesso",
+          description: "Serviço cadastrado com sucesso!",
+        });
+      } catch (error) {
+        console.error('Erro ao adicionar serviço:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao cadastrar serviço. Tente novamente.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleRemoveService = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('servicos_moradores')
+        .update({ status: 'inativo' })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao remover serviço:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao remover serviço. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setServices(services.filter(service => service.id !== id));
+      
+      toast({
+        title: "Sucesso",
+        description: "Serviço removido com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao remover serviço:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover serviço. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getServiceIcon = (serviceType: string) => {
@@ -81,6 +139,17 @@ const Servicos = () => {
     if (type.includes('pintor')) return '🎨';
     return '🔨';
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation title="Serviços dos Moradores" />
+        <div className="p-6">
+          <div className="text-center">Carregando serviços...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,46 +183,28 @@ const Servicos = () => {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Seu Nome</label>
                   <Input
-                    value={newService.name}
-                    onChange={(e) => setNewService({...newService, name: e.target.value})}
+                    value={newService.nome_morador}
+                    onChange={(e) => setNewService({...newService, nome_morador: e.target.value})}
                     placeholder="Ex: João Silva"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Apartamento</label>
                   <Input
-                    value={newService.apartment}
-                    onChange={(e) => setNewService({...newService, apartment: e.target.value})}
+                    value={newService.apartamento}
+                    onChange={(e) => setNewService({...newService, apartamento: e.target.value})}
                     placeholder="Ex: 101"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Serviço/Profissão</label>
-                  <Input
-                    value={newService.service}
-                    onChange={(e) => setNewService({...newService, service: e.target.value})}
-                    placeholder="Ex: Encanador, Eletricista, Diarista..."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Telefone</label>
-                  <Input
-                    value={newService.phone}
-                    onChange={(e) => setNewService({...newService, phone: e.target.value})}
-                    placeholder="Ex: (11) 99999-1234"
+                    type="number"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium mb-2 block">Descrição do Serviço</label>
+                <label className="text-sm font-medium mb-2 block">Serviço/Profissão</label>
                 <Input
-                  value={newService.description}
-                  onChange={(e) => setNewService({...newService, description: e.target.value})}
-                  placeholder="Descreva os serviços que você oferece..."
+                  value={newService.tipo_servico}
+                  onChange={(e) => setNewService({...newService, tipo_servico: e.target.value})}
+                  placeholder="Ex: Encanador, Eletricista, Diarista..."
                 />
               </div>
               
@@ -161,7 +212,7 @@ const Servicos = () => {
                 <Button 
                   onClick={handleAddService} 
                   className="bg-condo-green hover:bg-condo-green/90"
-                  disabled={!newService.name || !newService.apartment || !newService.service || !newService.phone}
+                  disabled={!newService.nome_morador || !newService.apartamento || !newService.tipo_servico}
                 >
                   Cadastrar Serviço
                 </Button>
@@ -179,46 +230,31 @@ const Servicos = () => {
             <Card key={service.id} className="p-6 shadow-card border-0">
               <div className="flex items-start gap-4">
                 <div className="text-3xl">
-                  {getServiceIcon(service.service)}
+                  {getServiceIcon(service.tipo_servico)}
                 </div>
                 
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold">{service.service}</h3>
+                      <h3 className="text-lg font-semibold">{service.tipo_servico}</h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                         <div className="flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          {service.name}
+                          {service.nome_morador}
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          Apt {service.apartment}
+                          Apt {service.apartamento}
                         </div>
                       </div>
                     </div>
-                    
-                    {service.rating > 0 && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-500">⭐</span>
-                        <span className="text-sm font-medium">{service.rating}</span>
-                      </div>
-                    )}
                   </div>
-                  
-                  <p className="text-foreground mb-4 leading-relaxed">
-                    {service.description}
-                  </p>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-condo-blue" />
-                      <a 
-                        href={`tel:${service.phone}`}
-                        className="text-condo-blue hover:text-condo-blue/80 font-medium"
-                      >
-                        {service.phone}
-                      </a>
+                      <span className="text-sm text-muted-foreground">
+                        Cadastrado em {new Date(service.created_at).toLocaleDateString('pt-BR')}
+                      </span>
                     </div>
                     
                     <Button
@@ -260,7 +296,7 @@ const Servicos = () => {
               <div>
                 <p className="font-medium">Dica para Moradores</p>
                 <p className="text-sm text-muted-foreground">
-                  Sempre peça referências e combine o preço antes de contratar qualquer serviço.
+                  Entre em contato diretamente com o morador para mais informações sobre o serviço.
                 </p>
               </div>
             </div>

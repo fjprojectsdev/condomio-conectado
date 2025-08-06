@@ -1,47 +1,60 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Package, User, MapPin, Calendar } from "lucide-react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Encomenda {
-  id: number;
-  name: string;
-  apartment: string;
-  description: string;
-  date: string;
-  collected: boolean;
+  id: string;
+  nome_morador: string;
+  apartamento: number;
+  descricao: string;
+  recebida: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const Encomendas = () => {
-  const [packages] = useLocalStorage<Encomenda[]>('encomendas', [
-    {
-      id: 1,
-      name: "Maria Silva",
-      apartment: "101",
-      description: "Caixa média - Correios",
-      date: "2024-01-15",
-      collected: false
-    },
-    {
-      id: 2,
-      name: "João Santos",
-      apartment: "203",
-      description: "Envelope - Sedex",
-      date: "2024-01-14",
-      collected: false
-    },
-    {
-      id: 3,
-      name: "Ana Costa",
-      apartment: "305",
-      description: "Caixa pequena - Mercado Livre",
-      date: "2024-01-13",
-      collected: true
-    }
-  ]);
+  const [packages, setPackages] = useState<Encomenda[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pendingPackages = packages.filter(pkg => !pkg.collected);
-  const collectedPackages = packages.filter(pkg => pkg.collected);
+  useEffect(() => {
+    fetchEncomendas();
+  }, []);
+
+  const fetchEncomendas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('encomendas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar encomendas:', error);
+        return;
+      }
+
+      setPackages(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar encomendas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pendingPackages = packages.filter(pkg => !pkg.recebida);
+  const collectedPackages = packages.filter(pkg => pkg.recebida);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation title="Encomendas" />
+        <div className="p-6">
+          <div className="text-center">Carregando encomendas...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,19 +82,19 @@ const Encomendas = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{pkg.name}</span>
+                      <span className="font-medium">{pkg.nome_morador}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Apartamento {pkg.apartment}</span>
+                      <span className="text-sm">Apartamento {pkg.apartamento}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        Recebido em {new Date(pkg.date).toLocaleDateString('pt-BR')}
+                        Recebido em {new Date(pkg.created_at).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                    <p className="text-sm text-muted-foreground">{pkg.descricao}</p>
                   </div>
                   <div className="bg-condo-orange/10 px-3 py-1 rounded-full">
                     <span className="text-xs font-medium text-condo-orange">Pendente</span>
@@ -105,13 +118,13 @@ const Encomendas = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{pkg.name}</span>
+                      <span className="font-medium">{pkg.nome_morador}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Apartamento {pkg.apartment}</span>
+                      <span className="text-sm">Apartamento {pkg.apartamento}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                    <p className="text-sm text-muted-foreground">{pkg.descricao}</p>
                   </div>
                   <div className="bg-condo-green/10 px-3 py-1 rounded-full">
                     <span className="text-xs font-medium text-condo-green">Retirada</span>
