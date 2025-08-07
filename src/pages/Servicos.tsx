@@ -2,7 +2,7 @@ import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wrench, User, Phone, MapPin, Plus, Trash2 } from "lucide-react";
+import { Wrench, User, Phone, MapPin, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -250,21 +250,10 @@ const Servicos = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Cadastrado em {new Date(service.created_at).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveService(service.id)}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      Cadastrado em {new Date(service.created_at).toLocaleDateString('pt-BR')}
+                    </span>
                   </div>
                 </div>
               </div>
