@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
 import { LogOut, Package, Megaphone, Settings } from "lucide-react";
 import AdminComunicados from "@/components/admin/AdminComunicados";
-import AdminEncomendas from "@/components/admin/AdminEncomendas";
+import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 
 const AdminPanel = () => {
   const { isAdminLoggedIn, logout } = useAdmin();
