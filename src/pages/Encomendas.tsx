@@ -8,6 +8,7 @@ interface Encomenda {
   id: string;
   nome_morador: string;
   apartamento: number;
+  bloco: string | null;
   descricao: string;
   recebida: boolean;
   created_at: string;
@@ -86,7 +87,9 @@ const Encomendas = () => {
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Apartamento {pkg.apartamento}</span>
+                      <span className="text-sm">
+                        {pkg.bloco ? `Bloco ${pkg.bloco} • Apartamento ${pkg.apartamento}` : `Apartamento ${pkg.apartamento}`}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -122,7 +125,9 @@ const Encomendas = () => {
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Apartamento {pkg.apartamento}</span>
+                      <span className="text-sm">
+                        {pkg.bloco ? `Bloco ${pkg.bloco} • Apartamento ${pkg.apartamento}` : `Apartamento ${pkg.apartamento}`}
+                      </span>
                     </div>
                     <p className="text-sm text-muted-foreground">{pkg.descricao}</p>
                   </div>

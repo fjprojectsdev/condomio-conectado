@@ -2,10 +2,11 @@ import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wrench, User, Phone, MapPin, Plus } from "lucide-react";
+import { Wrench, User, Phone, MapPin, Plus, PhoneCall } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAdmin } from "@/context/AdminContext";
 
 interface ServicoMorador {
   id: string;
@@ -13,6 +14,7 @@ interface ServicoMorador {
   apartamento: number;
   tipo_servico: string;
   status: string;
+  telefone: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -22,11 +24,13 @@ const Servicos = () => {
   const [newService, setNewService] = useState({
     nome_morador: "",
     apartamento: "",
-    tipo_servico: ""
+    tipo_servico: "",
+    telefone: "",
   });
   const [services, setServices] = useState<ServicoMorador[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isAdminLoggedIn } = useAdmin();
 
   useEffect(() => {
     fetchServicos();
@@ -53,19 +57,20 @@ const Servicos = () => {
     }
   };
 
-  const handleAddService = async () => {
-    if (newService.nome_morador && newService.apartamento && newService.tipo_servico) {
-      try {
-        const { data, error } = await supabase
-          .from('servicos_moradores')
-          .insert([{
-            nome_morador: newService.nome_morador,
-            apartamento: parseInt(newService.apartamento),
-            tipo_servico: newService.tipo_servico,
-            status: 'ativo'
-          }])
-          .select()
-          .single();
+const handleAddService = async () => {
+  if (newService.nome_morador && newService.apartamento && newService.tipo_servico) {
+    try {
+      const { data, error } = await supabase
+        .from('servicos_moradores')
+        .insert([{
+          nome_morador: newService.nome_morador,
+          apartamento: parseInt(newService.apartamento),
+          tipo_servico: newService.tipo_servico,
+          telefone: newService.telefone || null,
+          status: 'ativo'
+        }])
+        .select()
+        .single();
 
         if (error) {
           console.error('Erro ao adicionar serviço:', error);
@@ -77,9 +82,9 @@ const Servicos = () => {
           return;
         }
 
-        setServices([data, ...services]);
-        setNewService({ nome_morador: "", apartamento: "", tipo_servico: "" });
-        setShowAddForm(false);
+setServices([data, ...services]);
+setNewService({ nome_morador: "", apartamento: "", tipo_servico: "", telefone: "" });
+setShowAddForm(false);
         
         toast({
           title: "Sucesso",
@@ -165,13 +170,15 @@ const Servicos = () => {
             </p>
           </div>
           
-          <Button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-condo-blue hover:bg-condo-blue/90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar
-          </Button>
+{isAdminLoggedIn && (
+  <Button
+    onClick={() => setShowAddForm(!showAddForm)}
+    className="bg-condo-blue hover:bg-condo-blue/90"
+  >
+    <Plus className="h-4 w-4 mr-2" />
+    Adicionar
+  </Button>
+)}
         </div>
 
         {/* Formulário para adicionar serviço */}
@@ -237,16 +244,22 @@ const Servicos = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="text-lg font-semibold">{service.tipo_servico}</h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          {service.nome_morador}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          Apt {service.apartamento}
-                        </div>
-                      </div>
+<div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+  <div className="flex items-center gap-1">
+    <User className="h-4 w-4" />
+    {service.nome_morador}
+  </div>
+  <div className="flex items-center gap-1">
+    <MapPin className="h-4 w-4" />
+    Apt {service.apartamento}
+  </div>
+  {service.telefone && (
+    <div className="flex items-center gap-1">
+      <PhoneCall className="h-4 w-4" />
+      {service.telefone}
+    </div>
+  )}
+</div>
                     </div>
                   </div>
                   
