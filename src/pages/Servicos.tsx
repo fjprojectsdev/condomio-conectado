@@ -2,10 +2,11 @@ import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wrench, User, Phone, MapPin, Plus } from "lucide-react";
+import { Wrench, User, Phone, MapPin, Plus, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAdmin } from "@/context/AdminContext";
 
 interface ServicoMorador {
   id: string;
@@ -27,6 +28,7 @@ const Servicos = () => {
   const [services, setServices] = useState<ServicoMorador[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isAdminLoggedIn } = useAdmin();
 
   useEffect(() => {
     fetchServicos();
@@ -248,6 +250,19 @@ const Servicos = () => {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Botão de remoção - apenas para admins */}
+                    {isAdminLoggedIn && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveService(service.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2"
+                        title="Remover serviço"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                   
                   <div className="flex items-center gap-2">
