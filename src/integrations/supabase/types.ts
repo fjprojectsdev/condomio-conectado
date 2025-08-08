@@ -68,6 +68,7 @@ export type Database = {
       encomendas: {
         Row: {
           apartamento: number
+          bloco: string | null
           created_at: string
           descricao: string
           id: string
@@ -77,6 +78,7 @@ export type Database = {
         }
         Insert: {
           apartamento: number
+          bloco?: string | null
           created_at?: string
           descricao: string
           id?: string
@@ -86,6 +88,7 @@ export type Database = {
         }
         Update: {
           apartamento?: number
+          bloco?: string | null
           created_at?: string
           descricao?: string
           id?: string
@@ -98,28 +101,34 @@ export type Database = {
       servicos_moradores: {
         Row: {
           apartamento: number
+          bloco: string | null
           created_at: string
           id: string
           nome_morador: string
           status: string
+          telefone: string | null
           tipo_servico: string
           updated_at: string
         }
         Insert: {
           apartamento: number
+          bloco?: string | null
           created_at?: string
           id?: string
           nome_morador: string
           status?: string
+          telefone?: string | null
           tipo_servico: string
           updated_at?: string
         }
         Update: {
           apartamento?: number
+          bloco?: string | null
           created_at?: string
           id?: string
           nome_morador?: string
           status?: string
+          telefone?: string | null
           tipo_servico?: string
           updated_at?: string
         }
