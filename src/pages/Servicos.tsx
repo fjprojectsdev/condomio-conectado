@@ -2,7 +2,7 @@ import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wrench, User, Phone, MapPin, Plus, Trash2 } from "lucide-react";
+import { Wrench, User, Phone, MapPin, Plus, Trash2, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ interface ServicoMorador {
   nome_morador: string;
   apartamento: number;
   tipo_servico: string;
+  telefone?: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -20,9 +21,11 @@ interface ServicoMorador {
 
 const Servicos = () => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingService, setEditingService] = useState<ServicoMorador | null>(null);
   const [newService, setNewService] = useState({
     nome_morador: "",
-    apartamento: "",
+    telefone: "",
     tipo_servico: ""
   });
   const [services, setServices] = useState<ServicoMorador[]>([]);
@@ -56,13 +59,14 @@ const Servicos = () => {
   };
 
   const handleAddService = async () => {
-    if (newService.nome_morador && newService.apartamento && newService.tipo_servico) {
+    if (newService.nome_morador && newService.telefone && newService.tipo_servico) {
       try {
         const { data, error } = await supabase
           .from('servicos_moradores')
           .insert([{
             nome_morador: newService.nome_morador,
-            apartamento: parseInt(newService.apartamento),
+            apartamento: 1, // Campo obrigatório no banco, valor padrão
+            telefone: newService.telefone,
             tipo_servico: newService.tipo_servico,
             status: 'ativo'
           }])
@@ -80,7 +84,7 @@ const Servicos = () => {
         }
 
         setServices([data, ...services]);
-        setNewService({ nome_morador: "", apartamento: "", tipo_servico: "" });
+        setNewService({ nome_morador: "", telefone: "", tipo_servico: "" });
         setShowAddForm(false);
         
         toast({
@@ -95,6 +99,58 @@ const Servicos = () => {
           variant: "destructive"
         });
       }
+    }
+  };
+
+  const handleEditService = (service: ServicoMorador) => {
+    setEditingService(service);
+    setShowEditForm(true);
+    setShowAddForm(false);
+  };
+
+  const handleUpdateService = async () => {
+    if (!editingService || !editingService.nome_morador || !editingService.telefone || !editingService.tipo_servico) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('servicos_moradores')
+        .update({
+          nome_morador: editingService.nome_morador,
+          telefone: editingService.telefone,
+          tipo_servico: editingService.tipo_servico,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingService.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar serviço:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar serviço. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setServices(services.map(s => s.id === editingService.id ? data : s));
+      setEditingService(null);
+      setShowEditForm(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Serviço atualizado com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar serviço:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar serviço. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -191,12 +247,12 @@ const Servicos = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Apartamento</label>
+                  <label className="text-sm font-medium mb-2 block">Telefone</label>
                   <Input
-                    value={newService.apartamento}
-                    onChange={(e) => setNewService({...newService, apartamento: e.target.value})}
-                    placeholder="Ex: 101"
-                    type="number"
+                    value={newService.telefone}
+                    onChange={(e) => setNewService({...newService, telefone: e.target.value})}
+                    placeholder="Ex: (11) 99999-9999"
+                    type="tel"
                   />
                 </div>
               </div>
@@ -214,11 +270,67 @@ const Servicos = () => {
                 <Button 
                   onClick={handleAddService} 
                   className="bg-condo-green hover:bg-condo-green/90"
-                  disabled={!newService.nome_morador || !newService.apartamento || !newService.tipo_servico}
+                  disabled={!newService.nome_morador || !newService.telefone || !newService.tipo_servico}
                 >
                   Cadastrar Serviço
                 </Button>
                 <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Formulário para editar serviço */}
+        {showEditForm && editingService && (
+          <Card className="p-6 shadow-card border-0">
+            <h3 className="text-lg font-semibold mb-4">Editar Serviço</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Nome</label>
+                  <Input
+                    value={editingService.nome_morador}
+                    onChange={(e) => setEditingService({...editingService, nome_morador: e.target.value})}
+                    placeholder="Ex: João Silva"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Telefone</label>
+                  <Input
+                    value={editingService.telefone || ""}
+                    onChange={(e) => setEditingService({...editingService, telefone: e.target.value})}
+                    placeholder="Ex: (11) 99999-9999"
+                    type="tel"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Serviço/Profissão</label>
+                <Input
+                  value={editingService.tipo_servico}
+                  onChange={(e) => setEditingService({...editingService, tipo_servico: e.target.value})}
+                  placeholder="Ex: Encanador, Eletricista, Diarista..."
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleUpdateService} 
+                  className="bg-condo-blue hover:bg-condo-blue/90"
+                  disabled={!editingService.nome_morador || !editingService.telefone || !editingService.tipo_servico}
+                >
+                  Atualizar Serviço
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingService(null);
+                  }}
+                >
                   Cancelar
                 </Button>
               </div>
@@ -244,24 +356,37 @@ const Servicos = () => {
                           <User className="h-4 w-4" />
                           {service.nome_morador}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          Apt {service.apartamento}
-                        </div>
+                        {service.telefone && (
+                          <div className="flex items-center gap-1">
+                            <Phone className="h-4 w-4" />
+                            {service.telefone}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    {/* Botão de remoção - apenas para admins */}
+                    {/* Botões de editar e remover - apenas para admins */}
                     {isAdminLoggedIn && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveService(service.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2"
-                        title="Remover serviço"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditService(service)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
+                          title="Editar serviço"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveService(service.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2"
+                          title="Remover serviço"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )}
                   </div>
                   
