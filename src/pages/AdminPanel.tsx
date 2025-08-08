@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
-import { LogOut, Package, Megaphone, Settings } from "lucide-react";
+import { LogOut, Package, Megaphone, Wrench } from "lucide-react";
 import AdminComunicados from "@/components/admin/AdminComunicados";
 import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
+import AdminServicos from "@/components/admin/AdminServicos";
 
 const AdminPanel = () => {
   const { isAdminLoggedIn, logout } = useAdmin();
@@ -34,7 +35,7 @@ const AdminPanel = () => {
         <div className="flex justify-between items-center">
           <div className="text-primary-foreground">
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-            <p className="opacity-90">Gerenciar comunicados e encomendas</p>
+            <p className="opacity-90">Gerenciar comunicados, encomendas e serviços</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -59,7 +60,7 @@ const AdminPanel = () => {
       {/* Content */}
       <div className="p-6">
         <Tabs defaultValue="comunicados" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
             <TabsTrigger value="comunicados" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
               Comunicados
@@ -67,6 +68,10 @@ const AdminPanel = () => {
             <TabsTrigger value="encomendas" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Encomendas
+            </TabsTrigger>
+            <TabsTrigger value="servicos" className="flex items-center gap-2">
+              <Wrench className="h-4 w-4" />
+              Serviços
             </TabsTrigger>
           </TabsList>
 
@@ -76,6 +81,10 @@ const AdminPanel = () => {
 
           <TabsContent value="encomendas" className="space-y-6">
             <AdminEncomendas />
+          </TabsContent>
+
+          <TabsContent value="servicos" className="space-y-6">
+            <AdminServicos />
           </TabsContent>
         </Tabs>
       </div>
