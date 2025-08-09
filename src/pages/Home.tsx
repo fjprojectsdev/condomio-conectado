@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2, Package, Megaphone, Wrench } from "lucide-react";
+import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -34,6 +34,20 @@ const Home = () => {
       description: "Profissionais do condomínio",
       color: "bg-condo-gray",
       route: "/servicos"
+    },
+    {
+      title: "Salão de Festas",
+      icon: Calendar,
+      description: "Agendar área de eventos",
+      color: "bg-purple-500",
+      route: "/salao-festas"
+    },
+    {
+      title: "Classificados",
+      icon: ShoppingBag,
+      description: "Compra, venda e serviços",
+      color: "bg-yellow-500",
+      route: "/classificados"
     }
   ];
 
@@ -49,7 +63,7 @@ const Home = () => {
 
       {/* Menu Grid */}
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             return (

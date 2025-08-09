@@ -63,10 +63,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				'condo-blue': 'hsl(var(--condo-blue))',
-				'condo-green': 'hsl(var(--condo-green))',
-				'condo-orange': 'hsl(var(--condo-orange))',
-				'condo-gray': 'hsl(var(--condo-gray))'
+        'condo-blue': 'hsl(var(--condo-blue))',
+        'condo-green': 'hsl(var(--condo-green))',
+        'condo-orange': 'hsl(var(--condo-orange))',
+        'condo-gray': 'hsl(var(--condo-gray))',
+        'purple': {
+          '500': '#a855f7',
+          '600': '#9333ea',
+          '700': '#7c3aed'
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,11 +32,7 @@ export const AdminEncomendas = () => {
   });
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchEncomendas();
-  }, []);
-
-  const fetchEncomendas = async () => {
+  const fetchEncomendas = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("encomendas")
@@ -54,7 +50,11 @@ export const AdminEncomendas = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchEncomendas();
+  }, [fetchEncomendas]);
 
   const pendingEncomendas = encomendas.filter((e) => !e.recebida);
   const collectedEncomendas = encomendas.filter((e) => e.recebida);

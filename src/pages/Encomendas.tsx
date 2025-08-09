@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Package, User, MapPin, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Encomenda {
@@ -19,11 +19,7 @@ const Encomendas = () => {
   const [packages, setPackages] = useState<Encomenda[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchEncomendas();
-  }, []);
-
-  const fetchEncomendas = async () => {
+  const fetchEncomendas = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('encomendas')
@@ -41,7 +37,11 @@ const Encomendas = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchEncomendas();
+  }, [fetchEncomendas]);
 
   const pendingPackages = packages.filter(pkg => !pkg.recebida);
   const collectedPackages = packages.filter(pkg => pkg.recebida);

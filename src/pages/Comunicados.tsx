@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
 import { Megaphone, Calendar, User, AlertCircle, Info, CheckCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Comunicado {
@@ -17,11 +17,7 @@ const Comunicados = () => {
   const [comunicados, setComunicados] = useState<Comunicado[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchComunicados();
-  }, []);
-
-  const fetchComunicados = async () => {
+  const fetchComunicados = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('comunicados')
@@ -39,7 +35,11 @@ const Comunicados = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchComunicados();
+  }, [fetchComunicados]);
 
   const getIcon = (type: string) => {
     switch (type) {

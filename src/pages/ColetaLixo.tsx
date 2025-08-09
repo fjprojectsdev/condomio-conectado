@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Calendar, Clock, Edit, Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/context/AdminContext";
 import { useToast } from "@/hooks/use-toast";
@@ -33,11 +33,7 @@ const ColetaLixo = () => {
     "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"
   ];
 
-  useEffect(() => {
-    fetchColetaLixo();
-  }, []);
-
-  const fetchColetaLixo = async () => {
+  const fetchColetaLixo = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('coleta_lixo')
@@ -55,7 +51,11 @@ const ColetaLixo = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchColetaLixo();
+  }, [fetchColetaLixo]);
 
   // Mapear dias da semana para números
   const dayMap: { [key: string]: number } = {

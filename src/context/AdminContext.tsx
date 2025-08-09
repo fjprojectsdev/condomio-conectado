@@ -20,7 +20,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const login = (password: string): boolean => {
-    if (password === 'admin123') {
+    // Use environment variable or fallback to default for development
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+    if (password === adminPassword) {
       setIsAdminLoggedIn(true);
       sessionStorage.setItem('adminLoggedIn', 'true');
       return true;

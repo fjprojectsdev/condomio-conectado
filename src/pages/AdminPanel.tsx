@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
-import { LogOut, Package, Megaphone, Wrench } from "lucide-react";
+import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag } from "lucide-react";
 import AdminComunicados from "@/components/admin/AdminComunicados";
 import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 import AdminServicos from "@/components/admin/AdminServicos";
+import { AdminAgendamentos } from "@/components/admin/AdminAgendamentos";
+import { AdminClassificados } from "@/components/admin/AdminClassificados";
 
 const AdminPanel = () => {
   const { isAdminLoggedIn, logout } = useAdmin();
@@ -35,7 +37,7 @@ const AdminPanel = () => {
         <div className="flex justify-between items-center">
           <div className="text-primary-foreground">
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-            <p className="opacity-90">Gerenciar comunicados, encomendas e serviços</p>
+            <p className="opacity-90">Gerenciar comunicados, encomendas, serviços e agendamentos</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -60,7 +62,7 @@ const AdminPanel = () => {
       {/* Content */}
       <div className="p-6">
         <Tabs defaultValue="comunicados" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
             <TabsTrigger value="comunicados" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
               Comunicados
@@ -72,6 +74,14 @@ const AdminPanel = () => {
             <TabsTrigger value="servicos" className="flex items-center gap-2">
               <Wrench className="h-4 w-4" />
               Serviços
+            </TabsTrigger>
+            <TabsTrigger value="agendamentos" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Agendamentos
+            </TabsTrigger>
+            <TabsTrigger value="classificados" className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Classificados
             </TabsTrigger>
           </TabsList>
 
@@ -85,6 +95,14 @@ const AdminPanel = () => {
 
           <TabsContent value="servicos" className="space-y-6">
             <AdminServicos />
+          </TabsContent>
+
+          <TabsContent value="agendamentos" className="space-y-6">
+            <AdminAgendamentos />
+          </TabsContent>
+
+          <TabsContent value="classificados" className="space-y-6">
+            <AdminClassificados />
           </TabsContent>
         </Tabs>
       </div>

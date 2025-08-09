@@ -1,8 +1,50 @@
-# Welcome to your Lovable project
+# Condomínio Conectado
 
-## Project info
+## Sobre o Projeto
 
-**URL**: https://lovable.dev/projects/68a5afb8-821c-4be5-ad32-e307bda75d2e
+O **Condomínio Conectado** é uma aplicação web moderna para gerenciamento de condomínios, oferecendo funcionalidades para moradores e administradores.
+
+### Funcionalidades
+
+#### Para Moradores:
+- 📦 **Encomendas**: Consulte encomendas recebidas e aguardando retirada
+- 🗑️ **Coleta de Lixo**: Veja os dias e horários de coleta por tipo de lixo
+- 📢 **Comunicados**: Acesse avisos e informações da administração
+- 🔧 **Serviços**: Encontre profissionais disponíveis no condomínio
+- 🎉 **Salão de Festas**: Agende o salão para eventos com sistema de aprovação
+- 🛍️ **Classificados**: Publique anúncios de compra, venda, doação, troca e serviços
+
+#### Para Administradores:
+- ✏️ **Gerenciar Encomendas**: Registrar, editar e marcar encomendas como retiradas
+- 📅 **Gerenciar Coleta**: Configurar cronograma de coleta de lixo
+- 📝 **Gerenciar Comunicados**: Publicar e editar comunicados
+- 👥 **Gerenciar Serviços**: Cadastrar e gerenciar profissionais
+- 📆 **Gerenciar Agendamentos**: Aprovar, cancelar e gerenciar reservas do salão
+- 🛍️ **Gerenciar Classificados**: Ativar, desativar e moderar anúncios dos moradores
+
+### 📱 Progressive Web App (PWA)
+O app agora é um **Progressive Web App** completo:
+- 🚀 **Instalação**: Pode ser instalado na tela inicial do dispositivo
+- 🌐 **Offline**: Funciona sem conexão com internet (cache inteligente)
+- 🔄 **Atualizações**: Atualizações automáticas em segundo plano
+- 📱 **Nativo**: Experiência similar a app nativo no celular
+
+**URL do Projeto**: https://lovable.dev/projects/68a5afb8-821c-4be5-ad32-e307bda75d2e
+
+## Configuração
+
+### Acesso Administrativo
+Para acessar o painel administrativo, clique em "Acesso Administrativo" na tela inicial e use as credenciais:
+- **Senha padrão**: `admin123`
+
+### Configuração Personalizada
+Para personalizar a senha administrativa:
+1. Copie o arquivo `.env.example` para `.env`
+2. Defina a variável `VITE_ADMIN_PASSWORD` com sua senha personalizada
+3. Reinicie o servidor de desenvolvimento
+
+### Banco de Dados
+O projeto usa Supabase como backend. As configurações de conexão já estão configuradas no código.
 
 ## How can I edit this code?
 
