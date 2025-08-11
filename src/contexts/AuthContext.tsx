@@ -42,6 +42,7 @@ interface AuthContextType {
   isSindico: () => boolean;
   hasPermission: (permission: string) => boolean;
   supabase: typeof supabase;
+  loginAsAdmin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -198,6 +199,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return moradorPermissions.includes(permission);
   };
 
+  const loginAsAdmin = () => {
+    console.log('🔐 Fazendo login como administrador...');
+    
+    // Criar usuário admin simulado
+    const adminUser: User = {
+      id: 'admin-temp-id',
+      email: 'admin@condominio.com',
+      created_at: new Date().toISOString()
+    };
+    
+    // Definir usuário
+    setUser(adminUser);
+    
+    // Criar perfil admin
+    setUserProfile({
+      id: adminUser.id,
+      email: adminUser.email,
+      full_name: 'Administrador',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+    
+    // Definir papel como admin
+    setUserRole({
+      id: 'admin-role-temp',
+      user_id: adminUser.id,
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+    
+    console.log('✅ Login admin concluído!');
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -207,7 +242,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAdmin,
     isSindico,
     hasPermission,
-    supabase
+    supabase,
+    loginAsAdmin
   };
 
   return (

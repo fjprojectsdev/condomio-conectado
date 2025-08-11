@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { signUp, signIn, confirmEmail, resetPasswordForEmail } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => {
+  const { loginAsAdmin } = useAuth();
   const [currentTab, setCurrentTab] = useState('login');
   const [step, setStep] = useState('form'); // 'form' | 'verify' | 'reset'
   const [email, setEmail] = useState('');
@@ -131,15 +133,9 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
       console.log('✅ Login administrativo especial detectado');
       setLoading(true);
       
-      // Simular um usuário admin temporário para o contexto
-      const tempAdminUser = {
-        id: 'admin-temp-id',
-        email: 'admin@condominio.com',
-        created_at: new Date().toISOString()
-      };
-      
       // Aguardar um pouco para simular autenticação
       setTimeout(() => {
+        loginAsAdmin(); // Usar a função do contexto
         setMessage('Login de administrador realizado com sucesso!');
         setAttempts(0);
         setLoading(false);
