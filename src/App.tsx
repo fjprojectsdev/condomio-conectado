@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AdminProvider } from "@/context/AdminContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import Home from "./pages/Home";
 import ColetaLixo from "./pages/ColetaLixo";
@@ -20,28 +21,30 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AdminProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <PWAInstallPrompt />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/coleta-lixo" element={<ColetaLixo />} />
-            <Route path="/encomendas" element={<Encomendas />} />
-            <Route path="/comunicados" element={<Comunicados />} />
-            <Route path="/servicos" element={<Servicos />} />
-            <Route path="/salao-festas" element={<SalaoFestas />} />
-            <Route path="/classificados" element={<Classificados />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AdminProvider>
+    <AuthProvider>
+      <AdminProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <PWAInstallPrompt />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/coleta-lixo" element={<ColetaLixo />} />
+              <Route path="/encomendas" element={<Encomendas />} />
+              <Route path="/comunicados" element={<Comunicados />} />
+              <Route path="/servicos" element={<Servicos />} />
+              <Route path="/salao-festas" element={<SalaoFestas />} />
+              <Route path="/classificados" element={<Classificados />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AdminProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -61,47 +61,44 @@ export type Database = {
       }
       classificados: {
         Row: {
-          apartamento: string | null
+          apartamento: string
           ativo: boolean
           bloco: string | null
-          categoria: string | null
+          categoria: Database["public"]["Enums"]["classificado_categoria"]
           created_at: string
           descricao: string
           id: string
-          nome_contato: string | null
+          nome_contato: string
           preco: number | null
-          telefone: string | null
-          tipo: string
+          telefone: string
           titulo: string
           updated_at: string
         }
         Insert: {
-          apartamento?: string | null
+          apartamento: string
           ativo?: boolean
           bloco?: string | null
-          categoria?: string | null
+          categoria: Database["public"]["Enums"]["classificado_categoria"]
           created_at?: string
           descricao: string
           id?: string
-          nome_contato?: string | null
+          nome_contato: string
           preco?: number | null
-          telefone?: string | null
-          tipo: string
+          telefone: string
           titulo: string
           updated_at?: string
         }
         Update: {
-          apartamento?: string | null
+          apartamento?: string
           ativo?: boolean
           bloco?: string | null
-          categoria?: string | null
+          categoria?: Database["public"]["Enums"]["classificado_categoria"]
           created_at?: string
           descricao?: string
           id?: string
-          nome_contato?: string | null
+          nome_contato?: string
           preco?: number | null
-          telefone?: string | null
-          tipo?: string
+          telefone?: string
           titulo?: string
           updated_at?: string
         }
