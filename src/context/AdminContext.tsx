@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminContextType {
   isAdminLoggedIn: boolean;
@@ -10,6 +11,7 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const auth = useAuth();
 
   useEffect(() => {
     // Check if admin is already logged in from sessionStorage
@@ -18,6 +20,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsAdminLoggedIn(true);
     }
   }, []);
+
+  // Integração: se o usuário principal é admin, considera como admin logado
+  useEffect(() => {
+    if (auth.isAdmin()) {
+      setIsAdminLoggedIn(true);
+      sessionStorage.setItem('adminLoggedIn', 'true');
+    }
+  }, [auth.userRole, auth.user]);
 
   const login = (password: string): boolean => {
     // Use environment variable or fallback to default for development

@@ -1,8 +1,13 @@
 import { Navigation } from "@/components/ui/navigation";
 import { Card } from "@/components/ui/card";
-import { Megaphone, Calendar, User, AlertCircle, Info, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Megaphone, Calendar, User, AlertCircle, Info, CheckCircle, Plus, Edit, Trash2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Comunicado {
   id: string;
@@ -16,6 +21,10 @@ interface Comunicado {
 const Comunicados = () => {
   const [comunicados, setComunicados] = useState<Comunicado[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newComunicado, setNewComunicado] = useState({ titulo: "", mensagem: "" });
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   const fetchComunicados = useCallback(async () => {
     try {
@@ -40,6 +49,55 @@ const Comunicados = () => {
   useEffect(() => {
     fetchComunicados();
   }, [fetchComunicados]);
+
+  const handleAddComunicado = async () => {
+    if (!newComunicado.titulo || !newComunicado.mensagem) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('comunicados')
+        .insert([{
+          titulo: newComunicado.titulo,
+          mensagem: newComunicado.mensagem,
+          data: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao criar comunicado:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao criar comunicado. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setComunicados([data, ...comunicados]);
+      setNewComunicado({ titulo: "", mensagem: "" });
+      setShowAddForm(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Comunicado criado com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao criar comunicado:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar comunicado. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -84,12 +142,65 @@ const Comunicados = () => {
       
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div>
-          <h2 className="text-xl font-semibold">Avisos da Administração</h2>
-          <p className="text-muted-foreground">
-            {comunicados.length} comunicado{comunicados.length !== 1 ? 's' : ''} disponível{comunicados.length !== 1 ? 's' : ''}
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-semibold">Avisos da Administração</h2>
+            <p className="text-muted-foreground">
+              {comunicados.length} comunicado{comunicados.length !== 1 ? 's' : ''} disponível{comunicados.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          
+          {/* Botão para adicionar - só para admins */}
+          {isAdmin() && (
+            <Button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-condo-blue hover:bg-condo-blue/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Comunicado
+            </Button>
+          )}
         </div>
+
+        {/* Formulário para adicionar comunicado */}
+        {showAddForm && isAdmin() && (
+          <Card className="p-6 shadow-card border-0">
+            <h3 className="text-lg font-semibold mb-4">Criar Novo Comunicado</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Título</label>
+                <Input
+                  value={newComunicado.titulo}
+                  onChange={(e) => setNewComunicado({...newComunicado, titulo: e.target.value})}
+                  placeholder="Ex: Manutenção do elevador"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Mensagem</label>
+                <Textarea
+                  value={newComunicado.mensagem}
+                  onChange={(e) => setNewComunicado({...newComunicado, mensagem: e.target.value})}
+                  placeholder="Digite a mensagem do comunicado..."
+                  rows={4}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleAddComunicado} 
+                  className="bg-condo-green hover:bg-condo-green/90"
+                  disabled={!newComunicado.titulo || !newComunicado.mensagem}
+                >
+                  Publicar Comunicado
+                </Button>
+                <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Lista de Comunicados */}
         <div className="space-y-4">
