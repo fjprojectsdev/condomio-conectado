@@ -287,7 +287,7 @@ const Classificados = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Categoria *</label>
-                  <Select value={formData.categoria} onValueChange={(value: any) => setFormData({...formData, categoria: value})}>
+                  <Select value={formData.categoria} onValueChange={(value: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca') => setFormData({...formData, categoria: value})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
