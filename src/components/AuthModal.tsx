@@ -129,9 +129,22 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
     // Verificar se é login especial de admin
     if (email === 'admin' && password === 'Admin123') {
       console.log('✅ Login administrativo especial detectado');
-      setMessage('Login de administrador realizado com sucesso!');
-      setAttempts(0);
-      onSuccess();
+      setLoading(true);
+      
+      // Simular um usuário admin temporário para o contexto
+      const tempAdminUser = {
+        id: 'admin-temp-id',
+        email: 'admin@condominio.com',
+        created_at: new Date().toISOString()
+      };
+      
+      // Aguardar um pouco para simular autenticação
+      setTimeout(() => {
+        setMessage('Login de administrador realizado com sucesso!');
+        setAttempts(0);
+        setLoading(false);
+        onSuccess();
+      }, 1000);
       return;
     }
 

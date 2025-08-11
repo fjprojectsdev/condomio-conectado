@@ -76,20 +76,10 @@ const Home = () => {
     window.location.reload();
   };
   
-  // 🔴 FORÇAR SEMPRE LOGIN - VERSÃO DE DEPURAÇÃO
-  // Esta é uma versão temporária que SEMPRE mostra login primeiro
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // Garantir que sempre começa não autenticado quando recarrega a página
-  useEffect(() => {
-    console.log('🔄 Resetando estado de autenticação na inicialização');
-    setIsAuthenticated(false);
-  }, []);
-  
-  const shouldShowLogin = !loading && !isAuthenticated;
-  console.log('🔍 MODO DEBUG - shouldShowLogin:', shouldShowLogin, { 
+  // Verificar se deve mostrar login baseado no usuário real
+  const shouldShowLogin = !loading && (!user || !user.id);
+  console.log('🔍 DEBUG - shouldShowLogin:', shouldShowLogin, { 
     loading, 
-    isAuthenticated,
     hasUser: !!user, 
     hasUserId: !!(user?.id), 
     hasUserEmail: !!(user?.email) 
@@ -97,8 +87,8 @@ const Home = () => {
   
   // Função para autenticar usuário (chamada após login bem-sucedido)
   const handleLoginSuccess = () => {
-    console.log('✅ Login realizado com sucesso! Liberando acesso ao app...');
-    setIsAuthenticated(true);
+    console.log('✅ Login realizado com sucesso! Modal será fechado automaticamente.');
+    // Não precisamos mais do setIsAuthenticated, o AuthContext já gerencia isso
   };
   
   // Se não estiver carregando E não estiver autenticado, mostrar tela de login
@@ -147,7 +137,7 @@ const Home = () => {
           onOpenChange={setShowAuthModal}
           onSuccess={() => {
             setShowAuthModal(false);
-            handleLoginSuccess(); // Liberar acesso ao app
+            handleLoginSuccess();
           }}
         />
       </div>

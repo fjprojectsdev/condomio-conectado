@@ -63,7 +63,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [forceShowLogin, setForceShowLogin] = useState(true); // FORÇA SEMPRE LOGIN INICIAL
 
   useEffect(() => {
     // Verificar sessão atual
@@ -88,7 +87,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log('✅ Usuário válido encontrado:', session.user.email);
           console.log('🔑 Token válido:', !!session.access_token);
           setUser(session.user);
-          await fetchUserProfile(session.user.id);
+          await fetchUserProfile(session.user.id, session.user);
         } else {
           console.log('❌ Nenhuma sessão válida encontrada');
           console.log('   - Session exists:', !!session);
@@ -115,7 +114,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       async (event, session) => {
         if (session?.user) {
           setUser(session.user);
-          await fetchUserProfile(session.user.id);
+          await fetchUserProfile(session.user.id, session.user);
         } else {
           setUser(null);
           setUserProfile(null);
@@ -128,16 +127,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, currentUser?: any) => {
     try {
       // VERSÃO SIMPLIFICADA - Não busca tabelas extras para evitar erros
       console.log('📝 Configurando perfil básico para usuário:', userId);
       
+      // Usar o usuário passado como parâmetro ou o estado atual
+      const userToUse = currentUser || user;
+      
       // Criar perfil básico sem consultar banco
       setUserProfile({ 
         id: userId,
-        email: user?.email,
-        full_name: user?.email?.split('@')[0] || 'Usuário',
+        email: userToUse?.email,
+        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
