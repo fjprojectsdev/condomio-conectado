@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      agendamentos_salao: {
+        Row: {
+          created_at: string
+          data_evento: string
+          horario_fim: string
+          horario_inicio: string
+          id: string
+          nome_solicitante: string
+          observacoes: string | null
+          status: string
+          telefone: string
+          tipo_evento: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_evento: string
+          horario_fim: string
+          horario_inicio: string
+          id?: string
+          nome_solicitante: string
+          observacoes?: string | null
+          status?: string
+          telefone: string
+          tipo_evento: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_evento?: string
+          horario_fim?: string
+          horario_inicio?: string
+          id?: string
+          nome_solicitante?: string
+          observacoes?: string | null
+          status?: string
+          telefone?: string
+          tipo_evento?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      classificados: {
+        Row: {
+          apartamento: string | null
+          ativo: boolean
+          bloco: string | null
+          categoria: string | null
+          created_at: string
+          descricao: string
+          id: string
+          nome_contato: string | null
+          preco: number | null
+          telefone: string | null
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          apartamento?: string | null
+          ativo?: boolean
+          bloco?: string | null
+          categoria?: string | null
+          created_at?: string
+          descricao: string
+          id?: string
+          nome_contato?: string | null
+          preco?: number | null
+          telefone?: string | null
+          tipo: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          apartamento?: string | null
+          ativo?: boolean
+          bloco?: string | null
+          categoria?: string | null
+          created_at?: string
+          descricao?: string
+          id?: string
+          nome_contato?: string | null
+          preco?: number | null
+          telefone?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coleta_lixo: {
         Row: {
           created_at: string
@@ -98,6 +191,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          apartamento: string | null
+          bloco: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_prestador: boolean
+          telefone: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          apartamento?: string | null
+          bloco?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          is_prestador?: boolean
+          telefone?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          apartamento?: string | null
+          bloco?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_prestador?: boolean
+          telefone?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       servicos_moradores: {
         Row: {
           apartamento: number
@@ -109,6 +238,7 @@ export type Database = {
           telefone: string | null
           tipo_servico: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           apartamento: number
@@ -120,6 +250,7 @@ export type Database = {
           telefone?: string | null
           tipo_servico: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           apartamento?: number
@@ -131,6 +262,61 @@ export type Database = {
           telefone?: string | null
           tipo_servico?: string
           updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      sugestoes: {
+        Row: {
+          apartamento: number | null
+          bloco: string | null
+          created_at: string
+          id: string
+          mensagem: string
+          nome: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          apartamento?: number | null
+          bloco?: string | null
+          created_at?: string
+          id?: string
+          mensagem: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apartamento?: number | null
+          bloco?: string | null
+          created_at?: string
+          id?: string
+          mensagem?: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -139,10 +325,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      agendamento_status: "pendente" | "confirmado" | "cancelado"
+      app_role: "admin" | "user"
+      classificado_categoria:
+        | "venda"
+        | "compra"
+        | "servico"
+        | "doacao"
+        | "troca"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -269,6 +468,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agendamento_status: ["pendente", "confirmado", "cancelado"],
+      app_role: ["admin", "user"],
+      classificado_categoria: ["venda", "compra", "servico", "doacao", "troca"],
+    },
   },
 } as const
