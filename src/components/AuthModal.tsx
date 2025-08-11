@@ -112,8 +112,8 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
       if (error) {
         setError(error.message);
       } else {
-        setMessage('Um código de confirmação foi enviado para seu email. Verifique sua caixa de entrada.');
-        setStep('verify');
+        setMessage('Um link de confirmação foi enviado para seu email. Clique no link para ativar sua conta.');
+        // Não muda para step 'verify' - mantém na tela principal com mensagem
       }
     } catch (err) {
       setError('Erro inesperado. Tente novamente.');

@@ -12,39 +12,34 @@ export interface AuthResponse {
 }
 
 /**
- * Registra um novo usuário e cria OTP personalizado.
+ * Registra um novo usuário usando o sistema nativo do Supabase.
  * @param email - O email do usuário.
  * @param password - A senha do usuário (mínimo 6 caracteres).
  */
 export async function signUp(email: string, password: string): Promise<AuthResponse> {
   try {
-    // 1. Criar usuário no Supabase sem confirmação
+    console.log('🚀 Iniciando cadastro para:', email);
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: undefined
+        // URL para onde o usuário será redirecionado após confirmar o email
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     });
     
     if (error) {
+      console.error('❌ Erro no cadastro:', error);
       return { user: data?.user, error };
     }
     
-    // 2. Gerar OTP personalizado
-    const { data: otpData, error: otpError } = await supabase
-      .rpc('create_otp_for_email', { user_email: email });
-    
-    if (otpError) {
-      console.warn('Erro ao gerar OTP:', otpError);
-    } else {
-      console.log('OTP gerado:', otpData);
-      // Simular envio por email (em produção, usar serviço de email real)
-      simulateEmailSend(email, otpData);
-    }
+    console.log('✅ Cadastro realizado. Verificar email:', data.user?.email);
+    console.log('📧 Link de confirmação enviado para o email');
     
     return { user: data.user, error: null };
   } catch (err) {
+    console.error('💥 Erro inesperado no cadastro:', err);
     return { user: null, error: err };
   }
 }
