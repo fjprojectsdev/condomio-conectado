@@ -14,7 +14,7 @@ interface Classificado {
   id: string;
   titulo: string;
   descricao: string;
-  categoria: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca';
+  categoria: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel';
   preco: number | null;
   nome_contato: string;
   telefone: string;
@@ -190,6 +190,8 @@ const Classificados = () => {
         return 'bg-green-500/10 text-green-700 border-green-200';
       case 'compra':
         return 'bg-blue-500/10 text-blue-700 border-blue-200';
+      case 'aluguel':
+        return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
       case 'servico':
         return 'bg-purple-500/10 text-purple-700 border-purple-200';
       case 'doacao':
@@ -205,6 +207,7 @@ const Classificados = () => {
     switch (categoria) {
       case 'venda': return 'Vendo';
       case 'compra': return 'Procuro';
+      case 'aluguel': return 'Aluguel';
       case 'servico': return 'Serviço';
       case 'doacao': return 'Doação';
       case 'troca': return 'Troca';
@@ -261,6 +264,7 @@ const Classificados = () => {
                 <SelectItem value="todos">Todas as categorias</SelectItem>
                 <SelectItem value="venda">Vendas</SelectItem>
                 <SelectItem value="compra">Procuro</SelectItem>
+                <SelectItem value="aluguel">Aluguéis</SelectItem>
                 <SelectItem value="servico">Serviços</SelectItem>
                 <SelectItem value="doacao">Doações</SelectItem>
                 <SelectItem value="troca">Trocas</SelectItem>
@@ -287,13 +291,14 @@ const Classificados = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Categoria *</label>
-                  <Select value={formData.categoria} onValueChange={(value: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca') => setFormData({...formData, categoria: value})}>
+                  <Select value={formData.categoria} onValueChange={(value: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel') => setFormData({...formData, categoria: value})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="venda">Venda</SelectItem>
                       <SelectItem value="compra">Procuro</SelectItem>
+                      <SelectItem value="aluguel">Aluguel</SelectItem>
                       <SelectItem value="servico">Serviço</SelectItem>
                       <SelectItem value="doacao">Doação</SelectItem>
                       <SelectItem value="troca">Troca</SelectItem>

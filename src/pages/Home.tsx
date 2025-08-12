@@ -63,18 +63,6 @@ const Home = () => {
     hasValidUser: !!(user && user.id && user.email)
   });
   
-  // Função de debug para forçar logout completo
-  const forceLogout = async () => {
-    console.log('🗑️ Forçando logout completo...');
-    // Limpar localStorage
-    localStorage.clear();
-    // Limpar sessionStorage 
-    sessionStorage.clear();
-    // Fazer logout no Supabase
-    await logout();
-    // Recarregar a página
-    window.location.reload();
-  };
   
   // Verificar se deve mostrar login baseado no usuário real
   const shouldShowLogin = !loading && (!user || !user.id);
@@ -224,17 +212,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Debug Button - Temporary */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          onClick={forceLogout}
-          variant="destructive"
-          size="sm"
-          className="text-xs"
-        >
-          🗑️ Debug: Forçar Logout
-        </Button>
-      </div>
 
       {/* Admin Access */}
       <div className="p-6 pt-0">

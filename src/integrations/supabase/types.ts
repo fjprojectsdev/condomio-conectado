@@ -339,6 +339,7 @@ export type Database = {
         | "servico"
         | "doacao"
         | "troca"
+        | "aluguel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -468,7 +469,7 @@ export const Constants = {
     Enums: {
       agendamento_status: ["pendente", "confirmado", "cancelado"],
       app_role: ["admin", "user"],
-      classificado_categoria: ["venda", "compra", "servico", "doacao", "troca"],
+      classificado_categoria: ["venda", "compra", "servico", "doacao", "troca", "aluguel"],
     },
   },
 } as const

@@ -9,7 +9,7 @@ interface Classificado {
   id: string;
   titulo: string;
   descricao: string;
-  categoria: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca';
+  categoria: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel';
   preco: number | null;
   nome_contato: string;
   telefone: string;
@@ -113,6 +113,8 @@ export const AdminClassificados = () => {
         return 'bg-orange-500/10 text-orange-700 border-orange-200';
       case 'troca':
         return 'bg-gray-500/10 text-gray-700 border-gray-200';
+      case 'aluguel':
+        return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
       default:
         return 'bg-gray-500/10 text-gray-700 border-gray-200';
     }
@@ -125,6 +127,7 @@ export const AdminClassificados = () => {
       case 'servico': return 'Serviço';
       case 'doacao': return 'Doação';
       case 'troca': return 'Troca';
+      case 'aluguel': return 'Aluguel';
       default: return categoria;
     }
   };
