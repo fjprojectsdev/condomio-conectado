@@ -130,18 +130,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (userId: string, currentUser?: any) => {
     try {
-      console.log('📝 Configurando perfil para:', userId);
+      console.log('📝 Buscando perfil para:', userId);
       
-      const userToUse = currentUser || user;
+      // Tentar buscar perfil salvo
+      const { data: savedProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
       
-      // Criar perfil básico sempre (evita loops de busca)
-      setUserProfile({ 
-        id: userId,
-        email: userToUse?.email,
-        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      if (savedProfile) {
+        console.log('✅ Perfil salvo encontrado:', savedProfile);
+        setUserProfile(savedProfile);
+      } else {
+        console.log('⚠️ Criando perfil básico');
+        const userToUse = currentUser || user;
+        setUserProfile({ 
+          id: userId,
+          email: userToUse?.email,
+          full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
       
       // Papel padrão (morador)
       setUserRole({ 
@@ -153,7 +164,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       
     } catch (error) {
-      console.error('Erro ao configurar perfil:', error);
+      console.error('Erro ao buscar perfil:', error);
+      // Fallback em caso de erro
+      const userToUse = currentUser || user;
+      setUserProfile({ 
+        id: userId,
+        email: userToUse?.email,
+        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
     }
   };
 
