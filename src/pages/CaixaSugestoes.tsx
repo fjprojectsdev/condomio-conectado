@@ -102,14 +102,16 @@ const CaixaSugestoes = () => {
             <h1 className="text-xl font-bold">Caixa de Sugestões</h1>
             <p className="text-sm text-primary-foreground/80">Envie suas ideias e sugestões</p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            variant="ghost"
-            size="sm"
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
+          {!showForm && (
+            <Button
+              onClick={() => setShowForm(true)}
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
 

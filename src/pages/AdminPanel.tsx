@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
-import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag } from "lucide-react";
+import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag, Lightbulb } from "lucide-react";
 import AdminComunicados from "@/components/admin/AdminComunicados";
 import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 import AdminServicos from "@/components/admin/AdminServicos";
@@ -62,7 +62,7 @@ const AdminPanel = () => {
       {/* Content */}
       <div className="p-6">
         <Tabs defaultValue="comunicados" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
+          <TabsList className="grid w-full grid-cols-6 max-w-5xl">
             <TabsTrigger value="comunicados" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
               Comunicados
@@ -82,6 +82,10 @@ const AdminPanel = () => {
             <TabsTrigger value="classificados" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               Classificados
+            </TabsTrigger>
+            <TabsTrigger value="sugestoes" className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4" />
+              Sugestões
             </TabsTrigger>
           </TabsList>
 
@@ -103,6 +107,16 @@ const AdminPanel = () => {
 
           <TabsContent value="classificados" className="space-y-6">
             <AdminClassificados />
+          </TabsContent>
+
+          <TabsContent value="sugestoes" className="space-y-6">
+            <div className="space-y-4">
+              <iframe 
+                src="/admin/sugestoes" 
+                className="w-full h-[600px] border rounded-lg"
+                title="Gerenciar Sugestões"
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
