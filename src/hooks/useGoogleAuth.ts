@@ -14,8 +14,8 @@ export const useGoogleAuth = () => {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      // Forçar reload da página para atualizar o contexto
-      window.location.reload();
+      // Simular login no contexto atual usando loginAsAdmin
+      loginAsAdmin();
       
       // Opcional: Salvar no Supabase para histórico
       try {
