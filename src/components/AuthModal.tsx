@@ -9,6 +9,7 @@ import { Loader2, Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { signUp, signIn, confirmEmail, resetPasswordForEmail } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 
 interface AuthModalProps {
   open: boolean;
@@ -371,6 +372,20 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
             )}
 
             <TabsContent value="login" className="space-y-4">
+              <GoogleLoginButton 
+                onSuccess={onSuccess}
+                onError={(error) => setError(error.message)}
+              />
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                </div>
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="loginEmail">Email ou Usuário</Label>
                 <Input
