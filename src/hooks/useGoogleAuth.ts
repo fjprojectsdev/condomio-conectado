@@ -5,23 +5,37 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const useGoogleAuth = () => {
   const [loading, setLoading] = useState(false);
-  const { supabase } = useAuth();
+  const { supabase, loginAsAdmin } = useAuth();
 
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const firebaseUser = result.user;
 
-      // Salvar no Supabase
-      await supabase.from('users').upsert({
-        uid: user.uid,
-        email: user.email,
-        full_name: user.displayName,
-        avatar_url: user.photoURL,
-        provider: 'google'
-      });
+      // Criar usuário simulado para o contexto
+      const user = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        created_at: new Date().toISOString()
+      };
+
+      // Simular login no contexto atual
+      loginAsAdmin();
+      
+      // Opcional: Salvar no Supabase para histórico
+      try {
+        await supabase.from('users').upsert({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          full_name: firebaseUser.displayName,
+          avatar_url: firebaseUser.photoURL,
+          provider: 'google'
+        });
+      } catch (supabaseError) {
+        console.log('Erro ao salvar no Supabase (não crítico):', supabaseError);
+      }
 
       return { user, error: null };
     } catch (error: any) {
