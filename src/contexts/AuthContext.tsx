@@ -213,9 +213,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const loginAsAdmin = () => {
     console.log('🔐 Fazendo login como administrador...');
     
-    // Criar usuário admin simulado
+    // Criar usuário admin simulado com UUID válido
     const adminUser: User = {
-      id: 'admin-temp-id',
+      id: '00000000-0000-0000-0000-000000000001',
       email: 'admin@condominio.com',
       created_at: new Date().toISOString()
     };
@@ -234,7 +234,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Definir papel como admin
     setUserRole({
-      id: 'admin-role-temp',
+      id: '00000000-0000-0000-0000-000000000002',
       user_id: adminUser.id,
       role: 'admin',
       created_at: new Date().toISOString(),
