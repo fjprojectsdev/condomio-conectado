@@ -111,12 +111,14 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
     setError('');
 
     try {
-      await firebaseRegister(email, password);
-      setMessage('Conta criada com sucesso!');
-      // Forçar reload para atualizar contexto
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // Usar Supabase para registro com email/senha
+      const { error } = await signUp(email, password);
+      
+      if (error) {
+        setError(error.message);
+      } else {
+        setMessage('Um link de confirmação foi enviado para seu email. Clique no link para ativar sua conta.');
+      }
     } catch (err: any) {
       setError(err.message || 'Erro inesperado. Tente novamente.');
     } finally {
@@ -156,19 +158,23 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
     setError('');
 
     try {
-      await firebaseLogin(email, password);
-      setMessage('Login realizado com sucesso!');
-      setAttempts(0);
-      // Forçar reload para atualizar contexto
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err: any) {
-      if (err.message.includes('user-not-found') || err.message.includes('wrong-password') || err.message.includes('invalid-credential')) {
-        handleFailedAttempt();
+      // Usar Supabase para login com email/senha
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials') || 
+            error.message.includes('Email not confirmed')) {
+          handleFailedAttempt();
+        } else {
+          setError(error.message);
+        }
       } else {
-        setError(err.message || 'Erro inesperado. Tente novamente.');
+        setMessage('Login realizado com sucesso!');
+        setAttempts(0);
+        onSuccess();
       }
+    } catch (err: any) {
+      setError(err.message || 'Erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -345,7 +351,7 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
         {step === 'form' && (
           <div className="space-y-4">
             <div className="text-center text-sm text-gray-600 mb-2">
-              Login com Firebase (Chat e Notificações)
+              Supabase (Email) + Firebase (Google)
             </div>
             
             <Tabs value={currentTab} onValueChange={setCurrentTab}>
