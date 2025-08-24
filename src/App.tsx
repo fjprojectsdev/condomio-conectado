@@ -14,6 +14,8 @@ import Servicos from "./pages/Servicos";
 import SalaoFestas from "./pages/SalaoFestas";
 import Classificados from "./pages/Classificados";
 import ChatMoradores from "./pages/ChatMoradores";
+import CaixaSugestoes from "./pages/CaixaSugestoes";
+import AdminSugestoes from "./pages/AdminSugestoes";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import AuthCallback from "./pages/AuthCallback";
@@ -39,6 +41,8 @@ const App = () => (
               <Route path="/salao-festas" element={<SalaoFestas />} />
               <Route path="/classificados" element={<Classificados />} />
               <Route path="/chat-moradores" element={<ChatMoradores />} />
+              <Route path="/caixa-sugestoes" element={<CaixaSugestoes />} />
+              <Route path="/admin/sugestoes" element={<AdminSugestoes />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/auth/callback" element={<AuthCallback />} />

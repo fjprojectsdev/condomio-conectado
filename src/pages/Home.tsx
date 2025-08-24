@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit, MessageCircle } from "lucide-react";
+import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit, MessageCircle, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
@@ -72,6 +72,13 @@ const Home = () => {
       description: "Converse com seus vizinhos",
       color: "bg-green-500",
       route: "/chat-moradores"
+    },
+    {
+      title: "Caixa de Sugestões",
+      icon: Lightbulb,
+      description: "Envie suas ideias e sugestões",
+      color: "bg-orange-500",
+      route: "/caixa-sugestoes"
     }
   ];
 
