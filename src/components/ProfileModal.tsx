@@ -86,13 +86,26 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
             </Avatar>
             <div className="flex space-x-2">
               <Input
-                placeholder="URL da foto (opcional)"
-                value={photoUrl}
-                onChange={(e) => setPhotoUrl(e.target.value)}
-                className="text-sm"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => setPhotoUrl(e.target?.result as string);
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="hidden"
+                id="photo-upload"
               />
-              <Button variant="outline" size="icon">
-                <Camera className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('photo-upload')?.click()}
+                className="w-full"
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                Escolher Foto
               </Button>
             </div>
           </div>
