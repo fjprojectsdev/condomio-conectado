@@ -156,11 +156,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
       }
       
-      // Papel padrão (morador)
+      // Definir papel baseado no email
+      const role = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
       setUserRole({ 
         id: '',
         user_id: userId,
-        role: 'morador',
+        role,
         created_at: '',
         updated_at: ''
       });
@@ -182,6 +183,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const isAdmin = () => {
+    // Verificar se é o email autorizado como admin
+    if (user?.email === 'fjprojects2025@gmail.com') {
+      return true;
+    }
     return userRole?.role === 'admin' || userRole?.role === 'sindico';
   };
 
@@ -212,10 +217,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const loginAsAdmin = () => {
     console.log('🔐 Fazendo login como administrador...');
     
+    // Verificar se é o email autorizado
+    const currentEmail = user?.email;
+    const isAuthorizedAdmin = currentEmail === 'fjprojects2025@gmail.com';
+    
     // Criar usuário admin simulado com UUID válido
     const adminUser: User = {
-      id: '00000000-0000-0000-0000-000000000001',
-      email: 'admin@condominio.com',
+      id: isAuthorizedAdmin ? user?.id || '00000000-0000-0000-0000-000000000001' : '00000000-0000-0000-0000-000000000001',
+      email: isAuthorizedAdmin ? currentEmail : 'admin@condominio.com',
       created_at: new Date().toISOString()
     };
     
@@ -226,7 +235,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUserProfile({
       id: adminUser.id,
       email: adminUser.email,
-      full_name: 'Administrador',
+      full_name: isAuthorizedAdmin ? 'Administrador Principal' : 'Administrador',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     });
