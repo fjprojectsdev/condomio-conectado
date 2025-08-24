@@ -61,7 +61,7 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
 
       alert('Perfil salvo com sucesso!');
       onOpenChange(false);
-      window.location.reload();
+      // Não fazer reload, deixar o contexto atualizar naturalmente
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert(`Erro ao salvar: ${error.message}`);

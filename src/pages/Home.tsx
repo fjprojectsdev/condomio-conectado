@@ -18,10 +18,10 @@ const Home = () => {
   const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador');
   
   useEffect(() => {
-    if (isFirstTime) {
+    if (isFirstTime && !showProfileModal) {
       setShowProfileModal(true);
     }
-  }, [isFirstTime]);
+  }, [isFirstTime, showProfileModal]);
 
   const menuItems = [
     {
