@@ -14,7 +14,11 @@
     "fix-db": "node scripts/fix-database.js",
     "analyze-db": "node scripts/apply-database-fix.js",
     "test-rls": "node scripts/auto-fix-rls.js",
-    "test-quick": "node scripts/quick-test.js"
+    "test-quick": "node scripts/quick-test.js",
+    "android:add": "npx cap add android",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "npm run build && npx cap sync android && npx cap run android"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",
@@ -56,6 +60,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",

@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { signUp, signIn, confirmEmail, resetPasswordForEmail } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 interface AuthModalProps {
   open: boolean;
@@ -17,7 +18,9 @@ interface AuthModalProps {
 
 export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => {
   const { loginAsAdmin } = useAuth();
+  const { login: firebaseLogin, register: firebaseRegister } = useFirebaseAuth();
   const [currentTab, setCurrentTab] = useState('login');
+  const [useFirebase, setUseFirebase] = useState(false);
   const [step, setStep] = useState('form'); // 'form' | 'verify' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -107,16 +110,11 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
     setError('');
 
     try {
-      const { error } = await signUp(email, password);
-      
-      if (error) {
-        setError(error.message);
-      } else {
-        setMessage('Um link de confirmação foi enviado para seu email. Clique no link para ativar sua conta.');
-        // Não muda para step 'verify' - mantém na tela principal com mensagem
-      }
-    } catch (err) {
-      setError('Erro inesperado. Tente novamente.');
+      await firebaseRegister(email, password);
+      setMessage('Conta criada com sucesso! Você já pode fazer login.');
+      setCurrentTab('login');
+    } catch (err: any) {
+      setError(err.message || 'Erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -154,22 +152,16 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
     setError('');
 
     try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        if (error.message.includes('Invalid login credentials') || 
-            error.message.includes('Email not confirmed')) {
-          handleFailedAttempt();
-        } else {
-          setError(error.message);
-        }
+      await firebaseLogin(email, password);
+      setMessage('Login realizado com sucesso!');
+      setAttempts(0);
+      onSuccess();
+    } catch (err: any) {
+      if (err.message.includes('user-not-found') || err.message.includes('wrong-password')) {
+        handleFailedAttempt();
       } else {
-        setMessage('Login realizado com sucesso!');
-        setAttempts(0);
-        onSuccess();
+        setError(err.message || 'Erro inesperado. Tente novamente.');
       }
-    } catch (err) {
-      setError('Erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -344,11 +336,16 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
         )}
 
         {step === 'form' && (
-          <Tabs value={currentTab} onValueChange={setCurrentTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Entrar</TabsTrigger>
-              <TabsTrigger value="register">Criar Conta</TabsTrigger>
-            </TabsList>
+          <div className="space-y-4">
+            <div className="text-center text-sm text-gray-600 mb-2">
+              Login com Firebase (Chat e Notificações)
+            </div>
+            
+            <Tabs value={currentTab} onValueChange={setCurrentTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Entrar</TabsTrigger>
+                <TabsTrigger value="register">Criar Conta</TabsTrigger>
+              </TabsList>
 
             {message && (
               <Alert className="mt-4">
@@ -447,7 +444,8 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
                 Criar Conta
               </Button>
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          </div>
         )}
       </DialogContent>
     </Dialog>
