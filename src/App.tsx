@@ -13,6 +13,7 @@ import Comunicados from "./pages/Comunicados";
 import Servicos from "./pages/Servicos";
 import SalaoFestas from "./pages/SalaoFestas";
 import Classificados from "./pages/Classificados";
+import ChatMoradores from "./pages/ChatMoradores";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import AuthCallback from "./pages/AuthCallback";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/servicos" element={<Servicos />} />
               <Route path="/salao-festas" element={<SalaoFestas />} />
               <Route path="/classificados" element={<Classificados />} />
+              <Route path="/chat-moradores" element={<ChatMoradores />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/auth/callback" element={<AuthCallback />} />

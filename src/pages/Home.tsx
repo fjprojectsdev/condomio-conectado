@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit } from "lucide-react";
+import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
@@ -65,6 +65,13 @@ const Home = () => {
       description: "Compra, venda e serviços",
       color: "bg-yellow-500",
       route: "/classificados"
+    },
+    {
+      title: "Chat dos Moradores",
+      icon: MessageCircle,
+      description: "Converse com seus vizinhos",
+      color: "bg-green-500",
+      route: "/chat-moradores"
     }
   ];
 
