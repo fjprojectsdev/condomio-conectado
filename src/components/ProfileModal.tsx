@@ -43,21 +43,42 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
     try {
       const apartamentoCompleto = bloco && apartamento ? `${bloco}-${apartamento}` : '';
       
-      await supabase.from('users').upsert({
-        uid: user?.id,
+      // Tentar salvar na tabela profiles primeiro
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: user?.id,
         email: user?.email,
         first_name: firstName,
         last_name: lastName,
         full_name: `${firstName} ${lastName}`.trim(),
         apartamento: apartamentoCompleto,
-        avatar_url: photoUrl
+        avatar_url: photoUrl,
+        updated_at: new Date().toISOString()
       });
 
+      if (profileError) {
+        console.log('Tentando tabela users...');
+        // Se falhar, tentar tabela users
+        const { error: userError } = await supabase.from('users').upsert({
+          uid: user?.id,
+          email: user?.email,
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`.trim(),
+          apartamento: apartamentoCompleto,
+          avatar_url: photoUrl
+        });
+        
+        if (userError) {
+          throw userError;
+        }
+      }
+
+      alert('Perfil salvo com sucesso!');
       onOpenChange(false);
-      window.location.reload(); // Atualizar contexto
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
-      alert('Erro ao salvar perfil');
+      alert(`Erro ao salvar: ${error.message}`);
     } finally {
       setLoading(false);
     }
