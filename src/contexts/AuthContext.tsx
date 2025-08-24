@@ -130,32 +130,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (userId: string, currentUser?: any) => {
     try {
-      console.log('📝 Buscando perfil do usuário:', userId);
+      console.log('📝 Configurando perfil para:', userId);
       
-      // Tentar buscar perfil real do banco
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const userToUse = currentUser || user;
       
-      if (profile && !error) {
-        console.log('✅ Perfil encontrado no banco:', profile);
-        setUserProfile(profile);
-      } else {
-        console.log('⚠️ Perfil não encontrado, criando básico');
-        // Usar o usuário passado como parâmetro ou o estado atual
-        const userToUse = currentUser || user;
-        
-        // Criar perfil básico
-        setUserProfile({ 
-          id: userId,
-          email: userToUse?.email,
-          full_name: userToUse?.email?.split('@')[0] || 'Usuário',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-      }
+      // Criar perfil básico sempre (evita loops de busca)
+      setUserProfile({ 
+        id: userId,
+        email: userToUse?.email,
+        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
       
       // Papel padrão (morador)
       setUserRole({ 
@@ -167,7 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       
     } catch (error) {
-      console.error('Erro ao buscar perfil:', error);
+      console.error('Erro ao configurar perfil:', error);
     }
   };
 

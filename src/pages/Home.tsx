@@ -14,8 +14,8 @@ const Home = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, userProfile, logout, loading } = useAuth();
 
-  // Verificar se é primeiro login (sem perfil completo)
-  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador');
+  // Verificar se é primeiro login (sempre false para evitar loops)
+  const isFirstTime = false;
   
   useEffect(() => {
     if (isFirstTime && !showProfileModal) {
