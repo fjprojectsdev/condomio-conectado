@@ -132,14 +132,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userToUse = currentUser || user;
       
-      // Criar perfil básico sempre (evita loops)
-      setUserProfile({ 
-        id: userId,
-        email: userToUse?.email,
-        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      // Tentar buscar perfil salvo primeiro
+      try {
+        const { data: savedProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (savedProfile && savedProfile.first_name) {
+          setUserProfile(savedProfile);
+        } else {
+          throw new Error('Perfil não encontrado');
+        }
+      } catch {
+        // Se não encontrar, criar perfil básico
+        setUserProfile({ 
+          id: userId,
+          email: userToUse?.email,
+          full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
       
       // Papel padrão (morador)
       setUserRole({ 
