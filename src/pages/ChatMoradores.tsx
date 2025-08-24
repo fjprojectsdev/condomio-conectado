@@ -1,30 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Send, Image, Smile } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Send, Image, Smile, Paperclip, CheckCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ChatMoradores = () => {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
   const { messages, sendMessage } = useChat('moradores');
   const [newMessage, setNewMessage] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !user) return;
+    if ((!newMessage.trim() && !imagePreview) || !user) return;
 
-    await sendMessage(
-      newMessage,
-      user.id,
-      userProfile?.full_name || user.email?.split('@')[0] || 'Usuário'
-    );
-    setNewMessage('');
+    setLoading(true);
+    try {
+      await sendMessage(
+        newMessage,
+        user.id,
+        userProfile?.full_name || user.email?.split('@')[0] || 'Usuário',
+        userProfile?.avatar_url,
+        imagePreview
+      );
+      setNewMessage('');
+      setImagePreview('');
+    } catch (error) {
+      alert('Erro ao enviar mensagem');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
   };
 
   const formatTime = (timestamp: any) => {
@@ -33,87 +63,193 @@ const ChatMoradores = () => {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoje';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ontem';
+    } else {
+      return date.toLocaleDateString('pt-BR');
+    }
+  };
+
+  const groupMessagesByDate = (messages: any[]) => {
+    const groups = {};
+    messages.forEach(message => {
+      const date = formatDate(message.timestamp);
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+    });
+    return groups;
+  };
+
+  const groupedMessages = groupMessagesByDate(messages);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-primary p-4 shadow-elevated">
-        <div className="flex items-center text-primary-foreground">
+      <div className="bg-white border-b p-4 shadow-sm">
+        <div className="flex items-center">
           <Button
             onClick={() => navigate('/')}
             variant="ghost"
             size="sm"
-            className="text-primary-foreground hover:bg-primary-foreground/10 mr-3"
+            className="mr-3"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
+          <Avatar className="h-10 w-10 mr-3">
+            <AvatarFallback className="bg-blue-500 text-white">
+              CM
+            </AvatarFallback>
+          </Avatar>
           <div>
-            <h1 className="text-xl font-bold">Chat dos Moradores</h1>
-            <p className="text-sm text-primary-foreground/80">Converse com seus vizinhos</p>
+            <h1 className="font-semibold">Chat dos Moradores</h1>
+            <p className="text-sm text-gray-500">{messages.length} mensagens</p>
           </div>
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex flex-col h-[calc(100vh-140px)]">
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {messages.map((message) => {
-              const isMyMessage = message.userId === user?.id;
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`flex items-start space-x-2 max-w-xs ${isMyMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">
-                        {message.userName?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={`rounded-lg p-3 ${
-                        isMyMessage
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {Object.entries(groupedMessages).map(([date, dayMessages]) => (
+            <div key={date}>
+              {/* Date Separator */}
+              <div className="flex justify-center my-4">
+                <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
+                  {date}
+                </span>
+              </div>
+
+              {/* Messages for this date */}
+              {(dayMessages as any[]).map((message) => {
+                const isMyMessage = message.userId === user?.id;
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} mb-2`}
+                  >
+                    <div className={`flex items-end space-x-2 max-w-xs lg:max-w-md ${isMyMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       {!isMyMessage && (
-                        <p className="text-xs font-medium mb-1 opacity-70">
-                          {message.userName}
-                        </p>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={message.userAvatar} />
+                          <AvatarFallback className="text-xs bg-gray-300">
+                            {message.userName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
                       )}
-                      <p className="text-sm">{message.text}</p>
-                      <p className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-gray-500'}`}>
-                        {formatTime(message.timestamp)}
-                      </p>
+                      
+                      <div className={`rounded-2xl px-4 py-2 ${
+                        isMyMessage
+                          ? 'bg-blue-500 text-white rounded-br-md'
+                          : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
+                      }`}>
+                        {!isMyMessage && (
+                          <p className="text-xs font-medium mb-1 opacity-70">
+                            {message.userName}
+                          </p>
+                        )}
+                        
+                        {message.image && (
+                          <img 
+                            src={message.image} 
+                            alt="Imagem" 
+                            className="rounded-lg mb-2 max-w-full h-auto"
+                          />
+                        )}
+                        
+                        {message.text && (
+                          <p className="text-sm break-words">{message.text}</p>
+                        )}
+                        
+                        <div className="flex items-center justify-end mt-1 space-x-1">
+                          <span className={`text-xs ${isMyMessage ? 'text-blue-100' : 'text-gray-500'}`}>
+                            {formatTime(message.timestamp)}
+                          </span>
+                          {isMyMessage && (
+                            <CheckCheck className="h-3 w-3 text-blue-100" />
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
+                );
+              })}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
 
-        {/* Message Input */}
-        <div className="p-4 border-t bg-white">
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="icon">
-              <Image className="h-4 w-4" />
+      {/* Image Preview */}
+      {imagePreview && (
+        <div className="p-4 bg-white border-t">
+          <div className="relative inline-block">
+            <img src={imagePreview} alt="Preview" className="h-20 w-20 object-cover rounded" />
+            <Button
+              onClick={() => setImagePreview('')}
+              variant="destructive"
+              size="sm"
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+            >
+              ×
             </Button>
-            <Button variant="outline" size="icon">
-              <Smile className="h-4 w-4" />
-            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Message Input */}
+      <div className="p-4 bg-white border-t">
+        <div className="flex items-center space-x-2">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+            id="image-upload"
+          />
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => document.getElementById('image-upload')?.click()}
+          >
+            <Paperclip className="h-5 w-5 text-gray-500" />
+          </Button>
+          
+          <div className="flex-1 relative">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Digite sua mensagem..."
+              placeholder="Digite uma mensagem..."
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              className="flex-1"
+              className="rounded-full pr-12 bg-gray-100 border-0"
             />
-            <Button onClick={handleSend} size="icon">
-              <Send className="h-4 w-4" />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2"
+            >
+              <Smile className="h-5 w-5 text-gray-500" />
             </Button>
           </div>
+          
+          <Button 
+            onClick={handleSend} 
+            disabled={loading || (!newMessage.trim() && !imagePreview)}
+            size="icon"
+            className="rounded-full bg-blue-500 hover:bg-blue-600"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
