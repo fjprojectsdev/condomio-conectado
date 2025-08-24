@@ -73,9 +73,6 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
         }
       }
 
-      // Marcar perfil como completo
-      localStorage.setItem('profileCompleted', 'true');
-      
       alert('Perfil salvo com sucesso!');
       onOpenChange(false);
       window.location.reload();

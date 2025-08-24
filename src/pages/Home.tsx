@@ -15,7 +15,7 @@ const Home = () => {
   const { user, userProfile, logout, loading } = useAuth();
 
   // Verificar se é primeiro login (sem perfil completo)
-  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador') && !localStorage.getItem('profileCompleted');
+  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador');
   
   useEffect(() => {
     if (isFirstTime) {
