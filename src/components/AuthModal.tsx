@@ -350,9 +350,7 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
 
         {step === 'form' && (
           <div className="space-y-4">
-            <div className="text-center text-sm text-gray-600 mb-2">
-              Supabase (Email) + Firebase (Google)
-            </div>
+
             
             <Tabs value={currentTab} onValueChange={setCurrentTab}>
               <TabsList className="grid w-full grid-cols-2">
