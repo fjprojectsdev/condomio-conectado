@@ -112,8 +112,11 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
 
     try {
       await firebaseRegister(email, password);
-      setMessage('Conta criada com sucesso! Você já pode fazer login.');
-      setCurrentTab('login');
+      setMessage('Conta criada com sucesso!');
+      // Forçar reload para atualizar contexto
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (err: any) {
       setError(err.message || 'Erro inesperado. Tente novamente.');
     } finally {
@@ -156,9 +159,12 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
       await firebaseLogin(email, password);
       setMessage('Login realizado com sucesso!');
       setAttempts(0);
-      onSuccess();
+      // Forçar reload para atualizar contexto
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (err: any) {
-      if (err.message.includes('user-not-found') || err.message.includes('wrong-password')) {
+      if (err.message.includes('user-not-found') || err.message.includes('wrong-password') || err.message.includes('invalid-credential')) {
         handleFailedAttempt();
       } else {
         setError(err.message || 'Erro inesperado. Tente novamente.');

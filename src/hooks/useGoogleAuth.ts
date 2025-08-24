@@ -14,15 +14,8 @@ export const useGoogleAuth = () => {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      // Criar usuário simulado para o contexto
-      const user = {
-        id: firebaseUser.uid,
-        email: firebaseUser.email,
-        created_at: new Date().toISOString()
-      };
-
-      // Simular login no contexto atual
-      loginAsAdmin();
+      // Forçar reload da página para atualizar o contexto
+      window.location.reload();
       
       // Opcional: Salvar no Supabase para histórico
       try {
@@ -37,7 +30,7 @@ export const useGoogleAuth = () => {
         console.log('Erro ao salvar no Supabase (não crítico):', supabaseError);
       }
 
-      return { user, error: null };
+      return { user: firebaseUser, error: null };
     } catch (error: any) {
       return { user: null, error };
     } finally {
