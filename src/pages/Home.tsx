@@ -1,15 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut } from "lucide-react";
+import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
+import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Home = () => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, userProfile, logout, loading } = useAuth();
+
+  // Verificar se é primeiro login (sem perfil completo)
+  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador');
+  
+  useEffect(() => {
+    if (isFirstTime) {
+      setShowProfileModal(true);
+    }
+  }, [isFirstTime]);
 
   const menuItems = [
     {
@@ -128,6 +139,12 @@ const Home = () => {
             handleLoginSuccess();
           }}
         />
+        
+        <ProfileModal
+          open={showProfileModal}
+          onOpenChange={setShowProfileModal}
+          isFirstTime={isFirstTime}
+        />
       </div>
     );
   }
@@ -163,9 +180,17 @@ const Home = () => {
                   {userProfile?.full_name || user.email?.split('@')[0] || 'Usuário'}
                 </div>
                 <div className="text-xs text-primary-foreground/70">
-                  Logado
+                  {userProfile?.apartamento || 'Sem apartamento'}
                 </div>
               </div>
+              <Button
+                onClick={() => setShowProfileModal(true)}
+                variant="ghost"
+                size="sm"
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
               <Button
                 onClick={logout}
                 variant="ghost"
@@ -225,6 +250,12 @@ const Home = () => {
           </Button>
         </div>
       </div>
+      
+      <ProfileModal
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        isFirstTime={isFirstTime}
+      />
     </div>
   );
 };

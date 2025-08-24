@@ -14,7 +14,14 @@ export const useGoogleAuth = () => {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      // Simular login no contexto atual usando loginAsAdmin
+      // Criar usuário com dados do Google
+      const adminUser = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        created_at: new Date().toISOString()
+      };
+      
+      // Simular login no contexto
       loginAsAdmin();
       
       // Opcional: Salvar no Supabase para histórico
