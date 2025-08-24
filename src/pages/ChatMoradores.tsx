@@ -91,6 +91,72 @@ const ChatMoradores = () => {
     return groups;
   };
 
+  const [showConversationList, setShowConversationList] = useState(true);
+  const [conversations] = useState([
+    {
+      id: 'geral',
+      name: 'Chat Geral dos Moradores',
+      lastMessage: messages[messages.length - 1]?.text || 'Nenhuma mensagem ainda',
+      lastMessageTime: messages[messages.length - 1]?.timestamp || new Date(),
+      unreadCount: 0,
+      avatar: null
+    }
+  ]);
+
+  if (showConversationList) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b p-4 shadow-sm">
+          <div className="flex items-center">
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="sm"
+              className="mr-3"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-semibold">Chat dos Moradores</h1>
+          </div>
+        </div>
+
+        {/* Conversations List */}
+        <div className="p-4">
+          {conversations.map((conv) => (
+            <Card key={conv.id} className="mb-2 cursor-pointer hover:bg-gray-50" onClick={() => setShowConversationList(false)}>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-blue-500 text-white">
+                      {conv.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold truncate">{conv.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500">
+                          {formatTime(conv.lastMessageTime)}
+                        </span>
+                        {conv.unreadCount > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs px-2 py-1">
+                            {conv.unreadCount}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const groupedMessages = groupMessagesByDate(messages);
 
   return (
@@ -99,7 +165,7 @@ const ChatMoradores = () => {
       <div className="bg-white border-b p-4 shadow-sm">
         <div className="flex items-center">
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => setShowConversationList(true)}
             variant="ghost"
             size="sm"
             className="mr-3"
@@ -112,8 +178,8 @@ const ChatMoradores = () => {
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold">Chat dos Moradores</h1>
-            <p className="text-sm text-gray-500">{messages.length} mensagens</p>
+            <h1 className="font-semibold">Chat Geral dos Moradores</h1>
+            <p className="text-sm text-gray-500">Online</p>
           </div>
         </div>
       </div>
