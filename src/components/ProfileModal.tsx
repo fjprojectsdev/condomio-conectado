@@ -74,8 +74,13 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
       }
 
       alert('Perfil salvo com sucesso!');
-      onOpenChange(false);
-      window.location.reload();
+      if (isFirstTime) {
+        // Forçar fechamento e reload para primeiro login
+        window.location.reload();
+      } else {
+        onOpenChange(false);
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert(`Erro ao salvar: ${error.message}`);
@@ -88,7 +93,7 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
   const apartamentos = Array.from({ length: 99 }, (_, i) => String(i + 1).padStart(2, '0'));
 
   return (
-    <Dialog open={open} onOpenChange={isFirstTime ? () => {} : onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
