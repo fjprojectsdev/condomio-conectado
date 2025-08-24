@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, Package, Megaphone, Wrench, Calendar, ShoppingBag, User, LogOut, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -14,7 +15,7 @@ const Home = () => {
   const { user, userProfile, logout, loading } = useAuth();
 
   // Verificar se é primeiro login (sem perfil completo)
-  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador');
+  const isFirstTime = user && (!userProfile?.first_name || userProfile?.first_name === 'Administrador') && !localStorage.getItem('profileCompleted');
   
   useEffect(() => {
     if (isFirstTime) {
@@ -173,14 +174,21 @@ const Home = () => {
           </div>
           
           {/* User Info */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-10 w-10 border-2 border-primary-foreground/20">
+              <AvatarImage src={userProfile?.avatar_url} />
+              <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground">
+                {userProfile?.first_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                {userProfile?.last_name?.charAt(0) || ''}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex items-center space-x-2">
               <div className="text-right">
                 <div className="text-sm font-medium">
                   {userProfile?.full_name || user.email?.split('@')[0] || 'Usuário'}
                 </div>
                 <div className="text-xs text-primary-foreground/70">
-                  {userProfile?.apartamento || 'Sem apartamento'}
+                  {userProfile?.apartamento || 'Perfil incompleto'}
                 </div>
               </div>
               <Button

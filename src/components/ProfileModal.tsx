@@ -73,14 +73,12 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
         }
       }
 
+      // Marcar perfil como completo
+      localStorage.setItem('profileCompleted', 'true');
+      
       alert('Perfil salvo com sucesso!');
-      if (isFirstTime) {
-        // Forçar fechamento e reload para primeiro login
-        window.location.reload();
-      } else {
-        onOpenChange(false);
-        window.location.reload();
-      }
+      onOpenChange(false);
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert(`Erro ao salvar: ${error.message}`);
