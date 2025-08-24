@@ -130,20 +130,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (userId: string, currentUser?: any) => {
     try {
-      // VERSÃO SIMPLIFICADA - Não busca tabelas extras para evitar erros
-      console.log('📝 Configurando perfil básico para usuário:', userId);
+      console.log('📝 Buscando perfil do usuário:', userId);
       
-      // Usar o usuário passado como parâmetro ou o estado atual
-      const userToUse = currentUser || user;
+      // Tentar buscar perfil real do banco
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
       
-      // Criar perfil básico sem consultar banco
-      setUserProfile({ 
-        id: userId,
-        email: userToUse?.email,
-        full_name: userToUse?.email?.split('@')[0] || 'Usuário',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      if (profile && !error) {
+        console.log('✅ Perfil encontrado no banco:', profile);
+        setUserProfile(profile);
+      } else {
+        console.log('⚠️ Perfil não encontrado, criando básico');
+        // Usar o usuário passado como parâmetro ou o estado atual
+        const userToUse = currentUser || user;
+        
+        // Criar perfil básico
+        setUserProfile({ 
+          id: userId,
+          email: userToUse?.email,
+          full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
       
       // Papel padrão (morador)
       setUserRole({ 
@@ -154,9 +166,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         updated_at: ''
       });
       
-      console.log('✅ Perfil básico criado com sucesso');
     } catch (error) {
-      console.error('Erro ao criar perfil básico:', error);
+      console.error('Erro ao buscar perfil:', error);
     }
   };
 
