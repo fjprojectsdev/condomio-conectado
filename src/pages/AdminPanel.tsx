@@ -10,6 +10,7 @@ import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 import AdminServicos from "@/components/admin/AdminServicos";
 import { AdminAgendamentos } from "@/components/admin/AdminAgendamentos";
 import { AdminClassificados } from "@/components/admin/AdminClassificados";
+import AdminSugestoes from "@/pages/AdminSugestoes";
 
 const AdminPanel = () => {
   const { isAdminLoggedIn, logout } = useAdmin();
@@ -110,13 +111,7 @@ const AdminPanel = () => {
           </TabsContent>
 
           <TabsContent value="sugestoes" className="space-y-6">
-            <div className="space-y-4">
-              <iframe 
-                src="/admin/sugestoes" 
-                className="w-full h-[600px] border rounded-lg"
-                title="Gerenciar Sugestões"
-              />
-            </div>
+            <AdminSugestoes embedded={true} />
           </TabsContent>
         </Tabs>
       </div>

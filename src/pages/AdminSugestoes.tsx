@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { chatDb } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
-const AdminSugestoes = () => {
+const AdminSugestoes = ({ embedded = false }: { embedded?: boolean }) => {
   const navigate = useNavigate();
   const { } = useAuth();
   const [sugestoes, setSugestoes] = useState([]);
@@ -76,26 +76,27 @@ const AdminSugestoes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-primary p-4 shadow-elevated">
-        <div className="flex items-center text-primary-foreground">
-          <Button
-            onClick={() => navigate('/admin')}
-            variant="ghost"
-            size="sm"
-            className="text-primary-foreground hover:bg-primary-foreground/10 mr-3"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Gerenciar Sugestões</h1>
-            <p className="text-sm text-primary-foreground/80">Administrar sugestões dos moradores</p>
+    <div className={embedded ? "" : "min-h-screen bg-background"}>
+      {!embedded && (
+        <div className="bg-gradient-primary p-4 shadow-elevated">
+          <div className="flex items-center text-primary-foreground">
+            <Button
+              onClick={() => navigate('/admin')}
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:bg-primary-foreground/10 mr-3"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold">Gerenciar Sugestões</h1>
+              <p className="text-sm text-primary-foreground/80">Administrar sugestões dos moradores</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="p-4 space-y-4">
+      <div className={embedded ? "space-y-4" : "p-4 space-y-4"}>
         {sugestoes.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">
