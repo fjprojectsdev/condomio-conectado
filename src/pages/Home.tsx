@@ -25,16 +25,16 @@ const Home = () => {
     }
   }, [isFirstTime, showProfileModal]);
 
-  // Cores consistentes por categoria:
-  // Verde → serviços (coleta, serviços moradores)
-  // Azul → comunicação (chat, comunicados, sugestões)
-  // Amarelo → gestão (encomendas, salão, classificados)
+  // Cores suaves e modernas por categoria:
+  // Verde suave → serviços (coleta, serviços moradores)
+  // Azul suave → comunicação (chat, comunicados, sugestões)
+  // Laranja suave → gestão (encomendas, salão, classificados)
   const menuItems = [
     {
       title: "Coleta de Lixo",
       icon: Trash2,
       description: "Dias de coleta",
-      color: "bg-green-500", // Verde - serviços
+      color: "bg-gradient-to-br from-emerald-400 to-emerald-500", // Verde suave
       route: "/coleta-lixo",
       badge: null
     },
@@ -42,7 +42,7 @@ const Home = () => {
       title: "Encomendas",
       icon: Package,
       description: "Consultar encomendas",
-      color: "bg-yellow-500", // Amarelo - gestão
+      color: "bg-gradient-to-br from-amber-400 to-orange-500", // Laranja suave
       route: "/encomendas",
       badge: "2" // Exemplo de badge dinâmico
     },
@@ -50,7 +50,7 @@ const Home = () => {
       title: "Comunicados",
       icon: Megaphone,
       description: "Avisos da administração",
-      color: "bg-blue-500", // Azul - comunicação
+      color: "bg-gradient-to-br from-blue-400 to-blue-500", // Azul suave
       route: "/comunicados",
       badge: "1 novo"
     },
@@ -58,7 +58,7 @@ const Home = () => {
       title: "Serviços dos Moradores",
       icon: Wrench,
       description: "Profissionais do condomínio",
-      color: "bg-green-500", // Verde - serviços
+      color: "bg-gradient-to-br from-teal-400 to-teal-500", // Verde-azulado suave
       route: "/servicos",
       badge: null
     },
@@ -66,7 +66,7 @@ const Home = () => {
       title: "Salão de Festas",
       icon: Calendar,
       description: "Agendar área de eventos",
-      color: "bg-yellow-500", // Amarelo - gestão
+      color: "bg-gradient-to-br from-purple-400 to-purple-500", // Roxo suave
       route: "/salao-festas",
       badge: null
     },
@@ -74,7 +74,7 @@ const Home = () => {
       title: "Classificados",
       icon: ShoppingBag,
       description: "Compra, venda e serviços",
-      color: "bg-yellow-500", // Amarelo - gestão
+      color: "bg-gradient-to-br from-pink-400 to-rose-500", // Rosa suave
       route: "/classificados",
       badge: null
     },
@@ -82,7 +82,7 @@ const Home = () => {
       title: "Chat dos Moradores",
       icon: MessageCircle,
       description: "Converse com seus vizinhos",
-      color: "bg-blue-500", // Azul - comunicação
+      color: "bg-gradient-to-br from-cyan-400 to-blue-500", // Ciano suave
       route: "/chat-moradores",
       badge: null
     },
@@ -90,7 +90,7 @@ const Home = () => {
       title: "Caixa de Sugestões",
       icon: Lightbulb,
       description: "Envie suas ideias e sugestões",
-      color: "bg-blue-500", // Azul - comunicação
+      color: "bg-gradient-to-br from-yellow-400 to-amber-500", // Amarelo suave
       route: "/caixa-sugestoes",
       badge: null
     }
@@ -192,13 +192,13 @@ const Home = () => {
 
   // Se chegou aqui, o usuário está logado - mostrar o app normal
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <div className="bg-gradient-primary p-6 shadow-elevated">
-        <div className="flex justify-between items-center text-primary-foreground">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-8 shadow-xl">
+        <div className="flex justify-between items-center text-white">
           <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold mb-2">Condomínio Conectado</h1>
-            <p className="text-primary-foreground/80">Seu lar, nossa prioridade</p>
+            <h1 className="text-4xl font-bold mb-3 tracking-tight">Condomínio Conectado</h1>
+            <p className="text-blue-100 text-lg font-medium">Seu lar, nossa prioridade</p>
           </div>
           
           {/* User Info */}
@@ -224,7 +224,7 @@ const Home = () => {
                 onClick={() => setShowProfileModal(true)}
                 variant="ghost"
                 size="sm"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-white hover:bg-white/20 transition-all duration-200"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -232,7 +232,7 @@ const Home = () => {
                 onClick={logout}
                 variant="ghost"
                 size="sm"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-white hover:bg-white/20 transition-all duration-200"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -242,41 +242,41 @@ const Home = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="p-6 pb-0">
-        <div className="max-w-6xl mx-auto">
+      <div className="p-8 pb-0">
+        <div className="max-w-7xl mx-auto">
           <QuickActions />
         </div>
       </div>
 
       {/* Menu Grid */}
-      <div className="p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+      <div className="p-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             return (
               <Card 
                 key={item.title}
-                className="p-0 overflow-hidden shadow-card hover:shadow-elevated transition-all duration-200 border-0 relative"
+                className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-2xl transform hover:-translate-y-1"
               >
                 {/* Badge de notificação */}
                 {item.badge && (
-                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10 shadow-sm">
+                  <div className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full z-10 shadow-lg font-medium">
                     {item.badge}
                   </div>
                 )}
                 <Button
                   onClick={() => navigate(item.route)}
-                  className="w-full h-full p-4 bg-white hover:bg-gray-50 text-left flex flex-col items-center gap-3 rounded-lg"
+                  className="w-full h-full p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-4 rounded-2xl transition-all duration-300"
                   variant="ghost"
                 >
-                  <div className={`${item.color} p-3 rounded-xl shadow-sm`}>
-                    <IconComponent className="h-6 w-6 text-white" />
+                  <div className={`${item.color} p-4 rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
+                    <IconComponent className="h-7 w-7 text-white" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-sm font-semibold text-foreground mb-1">
+                    <h3 className="text-base font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-gray-500 leading-relaxed">
                       {item.description}
                     </p>
                   </div>

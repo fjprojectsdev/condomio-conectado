@@ -11,7 +11,7 @@ const QuickActions = () => {
       title: "Agendar Salão",
       icon: Calendar,
       color: "bg-yellow-500 hover:bg-yellow-600",
-      route: "/agendamentos"
+      route: "/salao-festas"
     },
     {
       title: "Novo Anúncio",
@@ -28,18 +28,21 @@ const QuickActions = () => {
   ];
 
   return (
-    <Card className="mb-6">
-      <CardContent className="p-4">
-        <h3 className="text-sm font-medium text-gray-600 mb-3">Ações Rápidas</h3>
-        <div className="flex space-x-3 overflow-x-auto">
+    <Card className="mb-8 bg-white shadow-xl rounded-2xl border-0">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800">Ações Rápidas</h3>
+          <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+        </div>
+        <div className="flex space-x-4 overflow-x-auto pb-2">
           {quickActions.map((action) => (
             <Button
               key={action.title}
               onClick={() => navigate(action.route)}
-              className={`${action.color} text-white flex-shrink-0 h-12 px-4`}
-              size="sm"
+              className={`${action.color} text-white flex-shrink-0 h-14 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold`}
+              size="lg"
             >
-              <action.icon className="h-4 w-4 mr-2" />
+              <action.icon className="h-5 w-5 mr-3" />
               {action.title}
             </Button>
           ))}
