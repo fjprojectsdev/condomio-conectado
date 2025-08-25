@@ -258,9 +258,9 @@ const Home = () => {
                 key={item.title}
                 className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-2xl transform hover:-translate-y-1"
               >
-                {/* Badge de notificação */}
+                {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
                 {item.badge && (
-                  <div className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full z-10 shadow-lg font-medium">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
                     {item.badge}
                   </div>
                 )}
