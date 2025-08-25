@@ -9,6 +9,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/context/AdminContext";
 import { useToast } from "@/hooks/use-toast";
+import UserAvatar from "@/components/UserAvatar";
 
 interface Classificado {
   id: string;
@@ -39,7 +40,8 @@ const Classificados = () => {
     nome_contato: "",
     telefone: "",
     apartamento: "",
-    bloco: ""
+    bloco: "",
+    imagens: [] as string[] // Novo campo para imagens
   });
   const { isAdminLoggedIn } = useAdmin();
   const { toast } = useToast();
@@ -252,24 +254,29 @@ const Classificados = () => {
           </Button>
         </div>
 
-        {/* Filtros */}
+        {/* Filtros com categorias mais claras */}
         <Card className="p-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium">Filtrar por categoria:</span>
-            <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas as categorias</SelectItem>
-                <SelectItem value="venda">Vendas</SelectItem>
-                <SelectItem value="compra">Procuro</SelectItem>
-                <SelectItem value="aluguel">Aluguéis</SelectItem>
-                <SelectItem value="servico">Serviços</SelectItem>
-                <SelectItem value="doacao">Doações</SelectItem>
-                <SelectItem value="troca">Trocas</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-sm font-medium">Categorias:</span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: 'todos', label: 'Todas', color: 'bg-gray-100' },
+                { value: 'venda', label: 'Vendas', color: 'bg-green-100 text-green-700' },
+                { value: 'servico', label: 'Serviços', color: 'bg-purple-100 text-purple-700' },
+                { value: 'doacao', label: 'Doações', color: 'bg-orange-100 text-orange-700' },
+                { value: 'compra', label: 'Procuro', color: 'bg-blue-100 text-blue-700' }
+              ].map((categoria) => (
+                <Button
+                  key={categoria.value}
+                  onClick={() => setFiltroCategoria(categoria.value)}
+                  variant={filtroCategoria === categoria.value ? "default" : "outline"}
+                  size="sm"
+                  className={filtroCategoria === categoria.value ? '' : categoria.color}
+                >
+                  {categoria.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </Card>
 
@@ -399,9 +406,9 @@ const Classificados = () => {
                   <p className="text-foreground leading-relaxed">{classificado.descricao}</p>
                   
                   <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {classificado.nome_contato}
+                    <div className="flex items-center gap-2">
+                      <UserAvatar name={classificado.nome_contato} size="sm" />
+                      <span>{classificado.nome_contato}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Phone className="h-4 w-4" />
@@ -411,6 +418,13 @@ const Classificados = () => {
                       <MapPin className="h-4 w-4" />
                       {classificado.bloco ? `Bloco ${classificado.bloco} • Apt ${classificado.apartamento}` : `Apt ${classificado.apartamento}`}
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto"
+                    >
+                      Marcar como Vendido
+                    </Button>
                   </div>
                   
                   <div className="text-xs text-muted-foreground">

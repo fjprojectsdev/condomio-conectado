@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
+import QuickActions from "@/components/QuickActions";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -23,62 +24,74 @@ const Home = () => {
     }
   }, [isFirstTime, showProfileModal]);
 
+  // Cores consistentes por categoria:
+  // Verde → serviços (coleta, serviços moradores)
+  // Azul → comunicação (chat, comunicados, sugestões)
+  // Amarelo → gestão (encomendas, salão, classificados)
   const menuItems = [
     {
       title: "Coleta de Lixo",
       icon: Trash2,
       description: "Dias de coleta",
-      color: "bg-condo-green",
-      route: "/coleta-lixo"
+      color: "bg-green-500", // Verde - serviços
+      route: "/coleta-lixo",
+      badge: null
     },
     {
       title: "Encomendas",
       icon: Package,
       description: "Consultar encomendas",
-      color: "bg-condo-blue",
-      route: "/encomendas"
+      color: "bg-yellow-500", // Amarelo - gestão
+      route: "/encomendas",
+      badge: "2" // Exemplo de badge dinâmico
     },
     {
       title: "Comunicados",
       icon: Megaphone,
       description: "Avisos da administração",
-      color: "bg-condo-orange",
-      route: "/comunicados"
+      color: "bg-blue-500", // Azul - comunicação
+      route: "/comunicados",
+      badge: "1 novo"
     },
     {
       title: "Serviços dos Moradores",
       icon: Wrench,
       description: "Profissionais do condomínio",
-      color: "bg-condo-gray",
-      route: "/servicos"
+      color: "bg-green-500", // Verde - serviços
+      route: "/servicos",
+      badge: null
     },
     {
       title: "Salão de Festas",
       icon: Calendar,
       description: "Agendar área de eventos",
-      color: "bg-purple-500",
-      route: "/salao-festas"
+      color: "bg-yellow-500", // Amarelo - gestão
+      route: "/salao-festas",
+      badge: null
     },
     {
       title: "Classificados",
       icon: ShoppingBag,
       description: "Compra, venda e serviços",
-      color: "bg-yellow-500",
-      route: "/classificados"
+      color: "bg-yellow-500", // Amarelo - gestão
+      route: "/classificados",
+      badge: null
     },
     {
       title: "Chat dos Moradores",
       icon: MessageCircle,
       description: "Converse com seus vizinhos",
-      color: "bg-green-500",
-      route: "/chat-moradores"
+      color: "bg-blue-500", // Azul - comunicação
+      route: "/chat-moradores",
+      badge: null
     },
     {
       title: "Caixa de Sugestões",
       icon: Lightbulb,
       description: "Envie suas ideias e sugestões",
-      color: "bg-orange-500",
-      route: "/caixa-sugestoes"
+      color: "bg-blue-500", // Azul - comunicação
+      route: "/caixa-sugestoes",
+      badge: null
     }
   ];
 
@@ -226,29 +239,42 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <div className="p-6 pb-0">
+        <div className="max-w-6xl mx-auto">
+          <QuickActions />
+        </div>
+      </div>
+
       {/* Menu Grid */}
       <div className="p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             return (
               <Card 
                 key={item.title}
-                className="p-0 overflow-hidden shadow-card hover:shadow-elevated transition-all duration-200 border-0"
+                className="p-0 overflow-hidden shadow-card hover:shadow-elevated transition-all duration-200 border-0 relative"
               >
+                {/* Badge de notificação */}
+                {item.badge && (
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10 shadow-sm">
+                    {item.badge}
+                  </div>
+                )}
                 <Button
                   onClick={() => navigate(item.route)}
-                  className="w-full h-full p-8 bg-white hover:bg-gray-50 text-left flex flex-col items-center gap-4 rounded-lg"
+                  className="w-full h-full p-4 bg-white hover:bg-gray-50 text-left flex flex-col items-center gap-3 rounded-lg"
                   variant="ghost"
                 >
-                  <div className={`${item.color} p-4 rounded-2xl shadow-sm`}>
-                    <IconComponent className="h-8 w-8 text-white" />
+                  <div className={`${item.color} p-3 rounded-xl shadow-sm`}>
+                    <IconComponent className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-foreground mb-1">
+                    <h3 className="text-sm font-semibold text-foreground mb-1">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {item.description}
                     </p>
                   </div>
