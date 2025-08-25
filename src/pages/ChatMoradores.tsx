@@ -13,7 +13,7 @@ import { useChat } from '@/hooks/useChat';
 const ChatMoradores = () => {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
-  const { messages, sendMessage } = useChat('moradores');
+  const { messages, sendMessage, loading: chatLoading } = useChat('geral');
   const [newMessage, setNewMessage] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
@@ -205,8 +205,17 @@ const ChatMoradores = () => {
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {Object.entries(groupedMessages).map(([date, dayMessages]) => (
-            <div key={date}>
+          {chatLoading ? (
+            <div className="text-center text-gray-500 py-8">
+              Carregando mensagens...
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              Nenhuma mensagem ainda. Seja o primeiro a conversar!
+            </div>
+          ) : (
+            Object.entries(groupedMessages).map(([date, dayMessages]) => (
+              <div key={date}>
               {/* Date Separator */}
               <div className="flex justify-center my-4">
                 <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
@@ -264,8 +273,9 @@ const ChatMoradores = () => {
                   </div>
                 );
               })}
-            </div>
-          ))}
+              </div>
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>

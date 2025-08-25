@@ -35,7 +35,11 @@ export const useChat = (roomId: string = 'geral') => {
         ...doc.data()
       })) as Message[];
       
+      console.log('Mensagens carregadas:', newMessages.length);
       setMessages(newMessages);
+      setLoading(false);
+    }, (error) => {
+      console.error('Erro ao carregar mensagens:', error);
       setLoading(false);
     });
 
