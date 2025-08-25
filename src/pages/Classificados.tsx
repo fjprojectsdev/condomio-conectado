@@ -419,9 +419,10 @@ const Classificados = () => {
                       {classificado.bloco ? `Bloco ${classificado.bloco} • Apt ${classificado.apartamento}` : `Apt ${classificado.apartamento}`}
                     </div>
                     <Button
+                      onClick={() => handleDelete(classificado.id)}
                       variant="outline"
                       size="sm"
-                      className="ml-auto"
+                      className="ml-auto text-green-600 hover:text-green-700"
                     >
                       Marcar como Vendido
                     </Button>

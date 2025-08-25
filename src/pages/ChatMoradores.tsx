@@ -9,6 +9,7 @@ import { ArrowLeft, Send, Image, Smile, Paperclip, CheckCheck } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
+import MessageReactions from '@/components/MessageReactions';
 
 const ChatMoradores = () => {
   const navigate = useNavigate();
@@ -55,6 +56,11 @@ const ChatMoradores = () => {
       reader.onload = (e) => setImagePreview(e.target?.result as string);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleReaction = (messageId: string, emoji: string) => {
+    // TODO: Implementar reações no Firebase
+    console.log('Reação:', messageId, emoji);
   };
 
   const formatTime = (timestamp: any) => {
@@ -268,6 +274,13 @@ const ChatMoradores = () => {
                             <CheckCheck className="h-3 w-3 text-blue-100" />
                           )}
                         </div>
+                        
+                        <MessageReactions
+                          messageId={message.id}
+                          reactions={message.reactions || {}}
+                          currentUserId={user?.id || ''}
+                          onReact={handleReaction}
+                        />
                       </div>
                     </div>
                   </div>

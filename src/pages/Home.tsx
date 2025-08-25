@@ -8,6 +8,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
 import QuickActions from "@/components/QuickActions";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -218,6 +219,7 @@ const Home = () => {
                   {userProfile?.apartamento || 'Perfil incompleto'}
                 </div>
               </div>
+              <ThemeToggle />
               <Button
                 onClick={() => setShowProfileModal(true)}
                 variant="ghost"
