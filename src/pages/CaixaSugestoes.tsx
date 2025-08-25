@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, Image, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { chatDb } from '@/lib/firebase';
+import { collection, addDoc, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 
 const CaixaSugestoes = () => {
   const navigate = useNavigate();
-  const { user, userProfile, supabase } = useAuth();
+  const { user, userProfile } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sugestoes, setSugestoes] = useState([]);
@@ -28,15 +30,21 @@ const CaixaSugestoes = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('sugestoes')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const q = query(
+        collection(chatDb, 'sugestoes'),
+        where('user_id', '==', user.id),
+        orderBy('created_at', 'desc')
+      );
       
-      if (!error && data) {
-        setSugestoes(data);
-      }
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const sugestoesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setSugestoes(sugestoesData);
+      });
+      
+      return unsubscribe;
     } catch (error) {
       console.error('Erro ao buscar sugestões:', error);
     }
@@ -50,9 +58,9 @@ const CaixaSugestoes = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('sugestoes').insert({
+      await addDoc(collection(chatDb, 'sugestoes'), {
         user_id: user?.id,
-        user_name: userProfile?.full_name || user?.email?.split('@')[0],
+        user_name: userProfile?.full_name || user?.email?.split('@')[0] || 'Usuário',
         titulo,
         descricao,
         imagem,
@@ -60,16 +68,14 @@ const CaixaSugestoes = () => {
         created_at: new Date().toISOString()
       });
 
-      if (error) throw error;
-
       alert('Sugestão enviada com sucesso!');
       setTitulo('');
       setDescricao('');
       setImagem('');
       setShowForm(false);
-      fetchMinhasSugestoes();
     } catch (error) {
-      alert('Erro ao enviar sugestão: ' + error.message);
+      console.error('Erro ao enviar sugestão:', error);
+      alert('Erro ao enviar sugestão');
     } finally {
       setLoading(false);
     }

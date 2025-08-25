@@ -7,10 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { chatDb } from '@/lib/firebase';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const AdminSugestoes = () => {
   const navigate = useNavigate();
-  const { supabase } = useAuth();
+  const { } = useAuth();
   const [sugestoes, setSugestoes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSugestao, setSelectedSugestao] = useState(null);
@@ -23,14 +25,20 @@ const AdminSugestoes = () => {
 
   const fetchSugestoes = async () => {
     try {
-      const { data, error } = await supabase
-        .from('sugestoes')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const q = query(
+        collection(chatDb, 'sugestoes'),
+        orderBy('created_at', 'desc')
+      );
       
-      if (!error && data) {
-        setSugestoes(data);
-      }
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const sugestoesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setSugestoes(sugestoesData);
+      });
+      
+      return unsubscribe;
     } catch (error) {
       console.error('Erro ao buscar sugestões:', error);
     }
@@ -44,19 +52,14 @@ const AdminSugestoes = () => {
         updateData.resposta_admin = respostaAdmin;
       }
 
-      const { error } = await supabase
-        .from('sugestoes')
-        .update(updateData)
-        .eq('id', sugestaoId);
-
-      if (error) throw error;
+      await updateDoc(doc(chatDb, 'sugestoes', sugestaoId), updateData);
 
       alert('Status atualizado com sucesso!');
-      fetchSugestoes();
       setSelectedSugestao(null);
       setResposta('');
     } catch (error) {
-      alert('Erro ao atualizar: ' + error.message);
+      console.error('Erro ao atualizar:', error);
+      alert('Erro ao atualizar status');
     } finally {
       setLoading(false);
     }
