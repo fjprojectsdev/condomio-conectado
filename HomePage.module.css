@@ -1,0 +1,58 @@
+.pageContainer {
+    padding: 20px;
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+.headerNav {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.headerLink {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.mainContent {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* --- Estilos para Ações Rápidas --- */
+.quickActionsSection {
+    margin: 2rem 0;
+    padding: 1.5rem; /* Padding interno para evitar que os botões toquem as bordas */
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.actionsContainer {
+    display: flex;
+    flex-direction: column; /* Mobile-first: botões empilhados */
+    gap: 1rem; /* Espaçamento uniforme entre os botões */
+}
+
+.actionButton {
+    width: 100%; /* Ocupa toda a largura no mobile */
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+/* Media Query para telas maiores (tablets e desktops) */
+@media (min-width: 768px) {
+    .actionsContainer {
+        flex-direction: row; /* Botões lado a lado */
+    }
+}
