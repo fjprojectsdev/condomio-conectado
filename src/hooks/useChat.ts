@@ -44,14 +44,20 @@ export const useChat = (roomId: string = 'geral') => {
 
   const sendMessage = async (text: string, userId: string, userName: string, userAvatar?: string, image?: string) => {
     try {
-      await addDoc(collection(chatDb, 'chats', roomId, 'messages'), {
-        text,
+      console.log('Enviando mensagem:', { text, userId, userName, userAvatar });
+      
+      const messageData = {
+        text: text || '',
         userId,
         userName,
-        userAvatar,
-        image,
-        timestamp: serverTimestamp()
-      });
+        userAvatar: userAvatar || '',
+        image: image || '',
+        timestamp: serverTimestamp(),
+        createdAt: new Date().toISOString()
+      };
+      
+      await addDoc(collection(chatDb, 'chats', roomId, 'messages'), messageData);
+      console.log('Mensagem enviada com sucesso!');
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
       throw error;

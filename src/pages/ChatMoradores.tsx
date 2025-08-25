@@ -58,14 +58,32 @@ const ChatMoradores = () => {
   };
 
   const formatTime = (timestamp: any) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    if (!timestamp) return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    let date;
+    if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
+    
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (timestamp: any) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    if (!timestamp) return 'Hoje';
+    
+    let date;
+    if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
+    
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -205,25 +223,21 @@ const ChatMoradores = () => {
                     className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} mb-2`}
                   >
                     <div className={`flex items-end space-x-2 max-w-xs lg:max-w-md ${isMyMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                      {!isMyMessage && (
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={message.userAvatar} />
-                          <AvatarFallback className="text-xs bg-gray-300">
-                            {message.userName?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={message.userAvatar} />
+                        <AvatarFallback className="text-xs bg-gray-300">
+                          {message.userName?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
                       
                       <div className={`rounded-2xl px-4 py-2 ${
                         isMyMessage
                           ? 'bg-blue-500 text-white rounded-br-md'
                           : 'bg-white text-gray-900 rounded-bl-md shadow-sm'
                       }`}>
-                        {!isMyMessage && (
-                          <p className="text-xs font-medium mb-1 opacity-70">
-                            {message.userName}
-                          </p>
-                        )}
+                        <p className="text-xs font-medium mb-1 opacity-70">
+                          {message.userName || 'Usuário'}
+                        </p>
                         
                         {message.image && (
                           <img 
