@@ -19,16 +19,6 @@ export const HomePage = () => {
         <h1>Página Inicial</h1>
         <p>Funcionalidades principais do condomínio aqui.</p>
 
-        <div className={styles.quickActionsSection}>
-          {/* Comentário da versão anterior:
-          <h2>Ações Rápidas</h2> */}
-          <h2 className={styles.sectionTitle}>Ações Rápidas</h2>
-          <div className={styles.actionsContainer}>
-            <button className={styles.actionButton}>Agendar Salão</button>
-            <button className={styles.actionButton}>Novo Comunicado</button>
-          </div>
-        </div>
-
         {/* 3. Aplicar o estilo correto ao título do chat */}
         <h2 className={styles.sectionTitle}>Mural de Comunicação (Chat Geral)</h2>
         <Chat roomId="geral" />

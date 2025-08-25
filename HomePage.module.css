@@ -1,5 +1,5 @@
 .pageContainer {
-    padding: 20px;
+    padding: 10px; /* Reduzido para telas menores */
     background-color: var(--background-primary);
     color: var(--text-primary);
     min-height: 100vh;
@@ -7,7 +7,10 @@
 
 .headerNav {
     margin-bottom: 20px;
-    text-align: right;
+    display: flex; /* Usar flexbox para melhor alinhamento */
+    justify-content: flex-end; /* Alinhar itens à direita */
+    align-items: center; /* Centralizar verticalmente */
+    gap: 15px; /* Espaço entre o botão e o link */
 }
 
 .headerLink {
@@ -17,42 +20,24 @@
 }
 
 .mainContent {
+    width: 100%; /* Ocupar toda a largura */
     max-width: 800px;
     margin: 0 auto;
+    padding: 0 5px; /* Adicionar um pequeno padding lateral */
+    box-sizing: border-box; /* Garantir que o padding não aumente a largura total */
 }
 
-/* --- Estilos para Ações Rápidas --- */
-.quickActionsSection {
-    margin: 2rem 0;
-    padding: 1.5rem; /* Padding interno para evitar que os botões toquem as bordas */
-    background-color: var(--background-secondary);
-    border-radius: 8px;
-    box-shadow: var(--card-shadow);
-}
-
-.actionsContainer {
-    display: flex;
-    flex-direction: column; /* Mobile-first: botões empilhados */
-    gap: 1rem; /* Espaçamento uniforme entre os botões */
-}
-
-.actionButton {
-    width: 100%; /* Ocupa toda a largura no mobile */
-    padding: 12px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 6px;
-    border: none;
-    background-color: var(--accent-color);
-    color: white;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.2s;
+.sectionTitle {
+    font-size: 1.2rem; /* Ajustar tamanho da fonte para mobile */
 }
 
 /* Media Query para telas maiores (tablets e desktops) */
 @media (min-width: 768px) {
-    .actionsContainer {
-        flex-direction: row; /* Botões lado a lado */
+    .pageContainer {
+        padding: 20px; /* Restaurar padding original */
+    }
+
+    .sectionTitle {
+        font-size: 1.5rem; /* Restaurar tamanho da fonte */
     }
 }
