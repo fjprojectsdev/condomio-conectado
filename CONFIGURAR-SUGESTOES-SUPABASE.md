@@ -7,21 +7,29 @@
 - Faça login na sua conta
 - Selecione o projeto: `ddzmibbhtjrgzdgflujg`
 
-### **2. Executar o Script SQL**
+### **2. Executar o Script SQL CORRETO**
 - No menu lateral, clique em **"SQL Editor"**
 - Clique em **"New Query"**
-- Copie e cole o conteúdo do arquivo `test-sugestoes.sql`
+- **IMPORTANTE:** Use o arquivo `fix-sugestoes-table.sql` (NÃO o test-sugestoes.sql)
+- Copie e cole o conteúdo do arquivo `fix-sugestoes-table.sql`
 - Clique em **"Run"** para executar
 
-### **3. Verificar se Funcionou**
+### **3. Por que usar fix-sugestoes-table.sql?**
+- ✅ Remove tabela existente com estrutura incorreta
+- ✅ Cria nova tabela com todas as colunas necessárias
+- ✅ Resolve o erro "column status does not exist"
+- ✅ Configura tudo do zero, garantindo funcionamento
+
+### **4. Verificar se Funcionou**
 Após executar o script, você deve ver:
-- ✅ Tabela `sugestoes` criada
+- ✅ Tabela `sugestoes` recriada corretamente
+- ✅ Todas as colunas criadas (incluindo `status`)
 - ✅ Índices criados
 - ✅ RLS habilitado
 - ✅ Políticas de segurança configuradas
 - ✅ Dados de teste inseridos
 
-### **4. Testar no Aplicativo**
+### **5. Testar no Aplicativo**
 - Acesse a página "Caixa de Sugestões"
 - Tente enviar uma nova sugestão
 - Verifique se aparece na lista
@@ -31,10 +39,14 @@ Após executar o script, você deve ver:
 
 ## 🔧 **Se Houver Erros**
 
+### **Erro: "column status does not exist"**
+- ✅ **SOLUÇÃO:** Use o arquivo `fix-sugestoes-table.sql`
+- ✅ Este script remove a tabela antiga e cria uma nova
+- ✅ Garante que todas as colunas existam
+
 ### **Erro: "column user_id does not exist"**
-- Execute o script completo `test-sugestoes.sql`
-- Verifique se a tabela foi criada corretamente
-- Use o comando: `SELECT * FROM sugestoes LIMIT 1;`
+- ✅ **SOLUÇÃO:** Use o arquivo `fix-sugestoes-table.sql`
+- ✅ Este script resolve todos os problemas de colunas
 
 ### **Erro de Permissão**
 - Verifique se o RLS está habilitado
@@ -43,7 +55,7 @@ Após executar o script, você deve ver:
 
 ---
 
-## 📊 **Estrutura da Tabela**
+## 📊 **Estrutura da Tabela (GARANTIDA)**
 
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
@@ -97,4 +109,13 @@ Após configurar, teste:
 
 ---
 
-**🎯 Execute o script `test-sugestoes.sql` no Supabase e as sugestões funcionarão perfeitamente!**
+## 🚨 **IMPORTANTE - Use o Script Correto**
+
+**❌ NÃO use:** `test-sugestoes.sql`
+**✅ USE:** `fix-sugestoes-table.sql`
+
+O segundo script resolve todos os problemas de colunas e garante funcionamento!
+
+---
+
+**🎯 Execute o script `fix-sugestoes-table.sql` no Supabase e as sugestões funcionarão perfeitamente!**
