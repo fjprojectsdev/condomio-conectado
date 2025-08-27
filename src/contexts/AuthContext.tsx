@@ -38,6 +38,7 @@ interface AuthContextType {
   userRole: UserRole | null;
   loading: boolean;
   logout: () => Promise<void>;
+  clearCorruptedSession: () => Promise<void>;
   isAdmin: () => boolean;
   isSindico: () => boolean;
   hasPermission: (permission: string) => boolean;
@@ -68,90 +69,117 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     let isMounted = true;
     let hasInitialized = false;
+    let authTimeout: NodeJS.Timeout;
     
-    // Verificar sessão atual
+    // Função para limpar estado e parar loading
+    const clearAuthState = () => {
+      if (isMounted) {
+        setUser(null);
+        setUserProfile(null);
+        setUserRole(null);
+        setLoading(false);
+        hasInitialized = true;
+      }
+    };
+    
+    // Verificar sessão atual com timeout de segurança
     const getSession = async () => {
       if (!isMounted) return;
       
       console.log('🔍 Verificando sessão atual...');
       
+      // Timeout de segurança para evitar loop infinito
+      authTimeout = setTimeout(() => {
+        console.log('⏰ Timeout de segurança - limpando estado');
+        clearAuthState();
+      }, 10000); // 10 segundos
+      
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         console.log('📋 Resposta do getSession:', { session, error });
         
+        // Limpar timeout se chegou aqui
+        clearTimeout(authTimeout);
+        
         if (error) {
           console.error('❌ Erro ao verificar sessão:', error);
-          if (isMounted) {
-            setUser(null);
-            setUserProfile(null);
-            setUserRole(null);
-            setLoading(false);
-          }
+          clearAuthState();
           return;
         }
         
-        // Verificação mais rigorosa
+        // Verificação mais rigorosa da sessão
         if (session && session.user && session.access_token) {
+          // Verificar se o token não expirou
+          const now = Math.floor(Date.now() / 1000);
+          const tokenExp = session.expires_at;
+          
+          if (tokenExp && now > tokenExp) {
+            console.log('⏰ Token expirado, fazendo logout automático');
+            await supabase.auth.signOut();
+            clearAuthState();
+            return;
+          }
+          
           console.log('✅ Usuário válido encontrado:', session.user.email);
           console.log('🔑 Token válido:', !!session.access_token);
+          
           if (isMounted) {
             setUser(session.user);
             await fetchUserProfile(session.user.id, session.user);
+            setLoading(false);
+            hasInitialized = true;
           }
         } else {
           console.log('❌ Nenhuma sessão válida encontrada');
           console.log('   - Session exists:', !!session);
           console.log('   - User exists:', !!session?.user);
           console.log('   - Token exists:', !!session?.access_token);
-          if (isMounted) {
-            setUser(null);
-            setUserProfile(null);
-            setUserRole(null);
-          }
+          clearAuthState();
         }
       } catch (error) {
         console.error('💥 Erro inesperado ao verificar sessão:', error);
-        if (isMounted) {
-          setUser(null);
-          setUserProfile(null);
-          setUserRole(null);
-        }
-      }
-      
-      if (isMounted && !hasInitialized) {
-        setLoading(false);
-        hasInitialized = true;
+        clearTimeout(authTimeout);
+        clearAuthState();
       }
     };
 
     getSession();
 
-    // Escutar mudanças de autenticação
+    // Escutar mudanças de autenticação com debounce
+    let authChangeTimeout: NodeJS.Timeout;
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email);
         
         if (!isMounted) return;
         
-        if (session?.user) {
-          setUser(session.user);
-          await fetchUserProfile(session.user.id, session.user);
-        } else {
-          setUser(null);
-          setUserProfile(null);
-          setUserRole(null);
-        }
-        
-        // Só definir loading como false se ainda não foi inicializado
-        if (!hasInitialized) {
-          setLoading(false);
-          hasInitialized = true;
-        }
+        // Debounce para evitar múltiplas chamadas
+        clearTimeout(authChangeTimeout);
+        authChangeTimeout = setTimeout(async () => {
+          if (!isMounted) return;
+          
+          if (session?.user) {
+            setUser(session.user);
+            await fetchUserProfile(session.user.id, session.user);
+          } else {
+            setUser(null);
+            setUserProfile(null);
+            setUserRole(null);
+          }
+          
+          // Só definir loading como false se ainda não foi inicializado
+          if (!hasInitialized) {
+            setLoading(false);
+            hasInitialized = true;
+          }
+        }, 100); // 100ms de debounce
       }
     );
 
     return () => {
       isMounted = false;
+      clearTimeout(authTimeout);
+      clearTimeout(authChangeTimeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -221,12 +249,56 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      console.log('🚪 Fazendo logout...');
+      
+      // Limpar todos os estados locais primeiro
       setUser(null);
       setUserProfile(null);
       setUserRole(null);
+      
+      // Fazer logout no Supabase
+      await supabase.auth.signOut();
+      
+      // Limpar dados locais para garantir
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      
+      console.log('✅ Logout concluído com sucesso');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('❌ Erro ao fazer logout:', error);
+      // Mesmo com erro, limpar estados locais
+      setUser(null);
+      setUserProfile(null);
+      setUserRole(null);
+    }
+  };
+
+  // Função para limpar sessão corrompida
+  const clearCorruptedSession = async () => {
+    try {
+      console.log('🧹 Limpando sessão corrompida...');
+      
+      // Forçar logout
+      await supabase.auth.signOut();
+      
+      // Limpar estados
+      setUser(null);
+      setUserProfile(null);
+      setUserRole(null);
+      setLoading(false);
+      
+      // Limpar dados locais
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      
+      console.log('✅ Sessão limpa com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao limpar sessão:', error);
+      // Mesmo com erro, limpar estados
+      setUser(null);
+      setUserProfile(null);
+      setUserRole(null);
+      setLoading(false);
     }
   };
 
@@ -306,6 +378,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     userRole,
     loading,
     logout,
+    clearCorruptedSession,
     isAdmin,
     isSindico,
     hasPermission,

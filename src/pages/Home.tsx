@@ -10,11 +10,13 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import ThemeToggle from "@/components/ThemeToggle";
 import { NotificationBadge } from "@/components/NotificationBadge";
+import { AuthFallback } from "@/components/AuthFallback";
 
 const Home = () => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthFallback, setShowAuthFallback] = useState(false);
   const { user, userProfile, logout, loading } = useAuth();
 
   // Verificar se é primeiro login (sempre false para evitar loops)
@@ -25,6 +27,20 @@ const Home = () => {
       setShowProfileModal(true);
     }
   }, [isFirstTime, showProfileModal]);
+
+  // Detectar loading infinito
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        console.log('⏰ Loading demorou muito, mostrando fallback...');
+        setShowAuthFallback(true);
+      }, 15000); // 15 segundos
+
+      return () => clearTimeout(timeout);
+    } else {
+      setShowAuthFallback(false);
+    }
+  }, [loading]);
 
   // Cores suaves e modernas por categoria:
   // Verde suave → serviços (coleta, serviços moradores)
@@ -179,13 +195,29 @@ const Home = () => {
     );
   }
 
-  // Se estiver carregando, mostrar loading
+  // Se estiver carregando, mostrar loading ou fallback
   if (loading) {
+    if (showAuthFallback) {
+      return (
+        <AuthFallback
+          onRetry={() => {
+            setShowAuthFallback(false);
+            window.location.reload();
+          }}
+          onClearSession={() => {
+            setShowAuthFallback(false);
+            window.location.reload();
+          }}
+        />
+      );
+    }
+    
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando...</p>
+          <p className="text-sm text-gray-500 mt-2">Se demorar muito, aguarde...</p>
         </div>
       </div>
     );
