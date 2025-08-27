@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
-import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag, Lightbulb } from "lucide-react";
+import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag, Lightbulb, MessageCircle } from "lucide-react";
 import AdminComunicados from "@/components/admin/AdminComunicados";
 import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 import AdminServicos from "@/components/admin/AdminServicos";
 import { AdminAgendamentos } from "@/components/admin/AdminAgendamentos";
 import { AdminClassificados } from "@/components/admin/AdminClassificados";
 import AdminSugestoes from "@/pages/AdminSugestoes";
+import AdminChat from "@/components/admin/AdminChat";
 
 const AdminPanel = () => {
   const { isAdminLoggedIn, logout } = useAdmin();
@@ -63,7 +64,7 @@ const AdminPanel = () => {
       {/* Content */}
       <div className="p-6">
         <Tabs defaultValue="comunicados" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 max-w-5xl">
+          <TabsList className="grid w-full grid-cols-7 max-w-6xl">
             <TabsTrigger value="comunicados" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
               Comunicados
@@ -87,6 +88,10 @@ const AdminPanel = () => {
             <TabsTrigger value="sugestoes" className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
               Sugestões
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Chat
             </TabsTrigger>
           </TabsList>
 
@@ -112,6 +117,10 @@ const AdminPanel = () => {
 
           <TabsContent value="sugestoes" className="space-y-6">
             <AdminSugestoes embedded={true} />
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-6">
+            <AdminChat />
           </TabsContent>
         </Tabs>
       </div>

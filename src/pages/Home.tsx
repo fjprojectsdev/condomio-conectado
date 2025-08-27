@@ -232,7 +232,7 @@ const Home = () => {
 
   // Se chegou aqui, o usuário está logado - mostrar o app normal
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-4 sm:p-6 lg:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row justify-between items-center text-white space-y-4 sm:space-y-0">
@@ -294,7 +294,7 @@ const Home = () => {
             return (
               <Card 
                 key={item.title}
-                className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
+                className="group p-0 overflow-hidden bg-white dark:bg-slate-800 shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
               >
                 {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
                 {item.badge && (
@@ -304,17 +304,17 @@ const Home = () => {
                 )}
                 <Button
                   onClick={() => navigate(item.route)}
-                  className="w-full h-full p-3 sm:p-4 lg:p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-2 sm:gap-3 lg:gap-4 rounded-xl sm:rounded-2xl transition-all duration-300"
+                  className="w-full h-full p-3 sm:p-4 lg:p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 dark:hover:from-slate-700 dark:hover:to-slate-600 text-left flex flex-col items-center gap-2 sm:gap-3 lg:gap-4 rounded-xl sm:rounded-2xl transition-all duration-300"
                   variant="ghost"
                 >
                   <div className={`${item.color} p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
                     <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                    <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 dark:text-gray-100 mb-1 sm:mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                       {item.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
