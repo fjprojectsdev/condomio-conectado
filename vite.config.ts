@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     // mode === 'development' &&
     // componentTagger(),
-    VitePWA({
+    /* VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'pwa-192x192.png', 'pwa-512x512.png'],
       workbox: {
@@ -71,7 +71,7 @@ export default defineConfig(({ mode }) => ({
         enabled: true,
         type: 'module'
       }
-    })
+    }) */
   ].filter(Boolean),
   resolve: {
     alias: {
