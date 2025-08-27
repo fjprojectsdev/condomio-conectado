@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para a coleção de chat
+    match /chats/{chatId}/messages/{messageId} {
+      // Permitir leitura para todos os usuários autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir escrita para usuários autenticados
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userName is string
+        && request.resource.data.text is string;
+        
+      // Permitir atualização apenas pelo autor da mensagem
+      allow update: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid;
+        
+      // Permitir exclusão apenas pelo autor da mensagem
+      allow delete: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // Regras para outras coleções (se necessário)
+    match /{document=**} {
+      // Por padrão, negar acesso
+      allow read, write: if false;
+    }
+  }
+}
