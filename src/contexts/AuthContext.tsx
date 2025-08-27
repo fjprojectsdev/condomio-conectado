@@ -66,8 +66,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    let hasInitialized = false;
+    
     // Verificar sessão atual
     const getSession = async () => {
+      if (!isMounted) return;
+      
       console.log('🔍 Verificando sessão atual...');
       
       try {
@@ -76,10 +81,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (error) {
           console.error('❌ Erro ao verificar sessão:', error);
-          setUser(null);
-          setUserProfile(null);
-          setUserRole(null);
-          setLoading(false);
+          if (isMounted) {
+            setUser(null);
+            setUserProfile(null);
+            setUserRole(null);
+            setLoading(false);
+          }
           return;
         }
         
@@ -87,25 +94,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (session && session.user && session.access_token) {
           console.log('✅ Usuário válido encontrado:', session.user.email);
           console.log('🔑 Token válido:', !!session.access_token);
-          setUser(session.user);
-          await fetchUserProfile(session.user.id, session.user);
+          if (isMounted) {
+            setUser(session.user);
+            await fetchUserProfile(session.user.id, session.user);
+          }
         } else {
           console.log('❌ Nenhuma sessão válida encontrada');
           console.log('   - Session exists:', !!session);
           console.log('   - User exists:', !!session?.user);
           console.log('   - Token exists:', !!session?.access_token);
+          if (isMounted) {
+            setUser(null);
+            setUserProfile(null);
+            setUserRole(null);
+          }
+        }
+      } catch (error) {
+        console.error('💥 Erro inesperado ao verificar sessão:', error);
+        if (isMounted) {
           setUser(null);
           setUserProfile(null);
           setUserRole(null);
         }
-      } catch (error) {
-        console.error('💥 Erro inesperado ao verificar sessão:', error);
-        setUser(null);
-        setUserProfile(null);
-        setUserRole(null);
       }
       
-      setLoading(false);
+      if (isMounted && !hasInitialized) {
+        setLoading(false);
+        hasInitialized = true;
+      }
     };
 
     getSession();
@@ -113,6 +129,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Escutar mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔄 Auth state change:', event, session?.user?.email);
+        
+        if (!isMounted) return;
+        
         if (session?.user) {
           setUser(session.user);
           await fetchUserProfile(session.user.id, session.user);
@@ -121,53 +141,81 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUserProfile(null);
           setUserRole(null);
         }
-        setLoading(false);
+        
+        // Só definir loading como false se ainda não foi inicializado
+        if (!hasInitialized) {
+          setLoading(false);
+          hasInitialized = true;
+        }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string, currentUser?: any) => {
     try {
       const userToUse = currentUser || user;
       
+      // Evitar buscar perfil se já temos um válido
+      if (userProfile && userProfile.id === userId) {
+        console.log('📋 Perfil já carregado, pulando busca...');
+        return;
+      }
+      
+      console.log('🔍 Buscando perfil do usuário:', userId);
+      
       // Tentar buscar perfil salvo primeiro
       try {
-        const { data: savedProfile } = await supabase
+        const { data: savedProfile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .single();
         
+        if (profileError) {
+          console.log('⚠️ Erro ao buscar perfil:', profileError.message);
+          throw profileError;
+        }
+        
         if (savedProfile && savedProfile.first_name) {
+          console.log('✅ Perfil encontrado:', savedProfile.full_name);
           setUserProfile(savedProfile);
         } else {
-          throw new Error('Perfil não encontrado');
+          console.log('⚠️ Perfil sem nome, criando básico...');
+          throw new Error('Perfil sem nome válido');
         }
-      } catch {
+      } catch (profileError) {
+        console.log('📝 Criando perfil básico para usuário:', userId);
         // Se não encontrar, criar perfil básico
-        setUserProfile({ 
+        const basicProfile = { 
           id: userId,
           email: userToUse?.email,
           full_name: userToUse?.email?.split('@')[0] || 'Usuário',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        };
+        setUserProfile(basicProfile);
       }
       
       // Definir papel baseado no email
-      const role = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
-      setUserRole({ 
-        id: '',
+      const role: 'admin' | 'sindico' | 'morador' = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
+      const userRoleData: UserRole = { 
+        id: `role-${userId}`,
         user_id: userId,
         role,
-        created_at: '',
-        updated_at: ''
-      });
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('👤 Papel definido:', role);
+      setUserRole(userRoleData);
       
     } catch (error) {
-      console.error('Erro ao configurar perfil:', error);
+      console.error('❌ Erro ao configurar perfil:', error);
     }
   };
 
