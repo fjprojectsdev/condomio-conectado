@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
-import QuickActions from "@/components/QuickActions";
+
 import ThemeToggle from "@/components/ThemeToggle";
 
 const Home = () => {
@@ -241,12 +241,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="p-8 pb-0">
-        <div className="max-w-7xl mx-auto">
-          <QuickActions />
-        </div>
-      </div>
+
 
       {/* Menu Grid */}
       <div className="p-8">
