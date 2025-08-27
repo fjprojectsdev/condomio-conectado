@@ -230,7 +230,7 @@ const ChatMoradores = () => {
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           {chatLoading ? (
             <div className="text-center text-gray-500 py-8">
@@ -312,7 +312,7 @@ const ChatMoradores = () => {
           )}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Image Preview */}
       {imagePreview && (
@@ -332,8 +332,8 @@ const ChatMoradores = () => {
       )}
 
       {/* Message Input */}
-      <div className="p-4 bg-white border-t">
-        <div className="flex items-center space-x-2">
+      <div className="p-4 bg-white border-t shadow-lg">
+        <div className="flex items-center space-x-3">
           <input
             type="file"
             accept="image/*"
@@ -345,22 +345,23 @@ const ChatMoradores = () => {
             variant="ghost" 
             size="icon"
             onClick={() => document.getElementById('image-upload')?.click()}
+            className="hover:bg-gray-100 rounded-full p-2"
           >
-            <Paperclip className="h-5 w-5 text-gray-500" />
+            <Paperclip className="h-5 w-5 text-gray-600" />
           </Button>
           
           <div className="flex-1 relative">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Digite uma mensagem..."
+              placeholder="Digite sua mensagem aqui..."
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              className="rounded-full pr-12 bg-gray-100 border-0"
+              className="rounded-full pr-12 bg-gray-50 border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-500 h-12 text-base"
             />
             <Button 
               variant="ghost" 
               size="icon"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 rounded-full p-1"
             >
               <Smile className="h-5 w-5 text-gray-500" />
             </Button>
@@ -370,11 +371,18 @@ const ChatMoradores = () => {
             onClick={handleSend} 
             disabled={loading || (!newMessage.trim() && !imagePreview)}
             size="icon"
-            className="rounded-full bg-blue-500 hover:bg-blue-600"
+            className="rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed h-12 w-12 shadow-lg transition-all duration-200"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5 text-white" />
           </Button>
         </div>
+        
+        {/* Status da mensagem */}
+        {loading && (
+          <div className="text-center text-sm text-gray-500 mt-2">
+            Enviando mensagem...
+          </div>
+        )}
       </div>
     </div>
   );

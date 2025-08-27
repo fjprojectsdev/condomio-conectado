@@ -9,6 +9,7 @@ import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 import ThemeToggle from "@/components/ThemeToggle";
+import { NotificationBadge } from "@/components/NotificationBadge";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const Home = () => {
       description: "Consultar encomendas",
       color: "bg-gradient-to-br from-amber-400 to-orange-500", // Laranja suave
       route: "/encomendas",
-      badge: "2" // Exemplo de badge dinâmico
+      badge: null // Removido badge estático
     },
     {
       title: "Comunicados",
@@ -52,7 +53,7 @@ const Home = () => {
       description: "Avisos da administração",
       color: "bg-gradient-to-br from-blue-400 to-blue-500", // Azul suave
       route: "/comunicados",
-      badge: "1 novo"
+      badge: null // Removido badge estático
     },
     {
       title: "Serviços dos Moradores",
@@ -220,6 +221,7 @@ const Home = () => {
                 </div>
               </div>
               <ThemeToggle />
+              <NotificationBadge />
               <Button
                 onClick={() => setShowProfileModal(true)}
                 variant="ghost"
