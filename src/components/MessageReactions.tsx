@@ -19,6 +19,10 @@ const MessageReactions = ({ messageId, reactions = {}, currentUserId, onReact }:
     setShowEmojiPicker(false);
   };
 
+  const hasUserReacted = (emoji: string) => {
+    return reactions[emoji]?.includes(currentUserId) || false;
+  };
+
   return (
     <div className="flex items-center space-x-1 mt-1">
       {/* Reações existentes */}
@@ -28,11 +32,12 @@ const MessageReactions = ({ messageId, reactions = {}, currentUserId, onReact }:
           onClick={() => handleReaction(emoji)}
           variant="ghost"
           size="sm"
-          className={`h-6 px-2 text-xs ${
-            userIds.includes(currentUserId) 
-              ? 'bg-blue-100 text-blue-600' 
-              : 'bg-gray-100 text-gray-600'
+          className={`h-6 px-2 text-xs transition-all duration-200 ${
+            hasUserReacted(emoji)
+              ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
+          title={`${emoji} ${userIds.length} reação${userIds.length !== 1 ? 'ões' : ''}`}
         >
           {emoji} {userIds.length}
         </Button>
@@ -44,7 +49,8 @@ const MessageReactions = ({ messageId, reactions = {}, currentUserId, onReact }:
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+          title="Adicionar reação"
         >
           <Smile className="h-3 w-3" />
         </Button>
@@ -58,7 +64,10 @@ const MessageReactions = ({ messageId, reactions = {}, currentUserId, onReact }:
                 onClick={() => handleReaction(emoji)}
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 hover:bg-gray-100"
+                className={`h-8 w-8 p-0 hover:bg-gray-100 transition-colors duration-200 ${
+                  hasUserReacted(emoji) ? 'bg-blue-50 border border-blue-200' : ''
+                }`}
+                title={hasUserReacted(emoji) ? 'Remover reação' : 'Adicionar reação'}
               >
                 {emoji}
               </Button>

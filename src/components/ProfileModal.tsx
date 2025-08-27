@@ -5,16 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isFirstTime?: boolean;
+  onProfileSaved?: () => void;
 }
 
-export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: ProfileModalProps) => {
+export const ProfileModal = ({ open, onOpenChange, isFirstTime = false, onProfileSaved }: ProfileModalProps) => {
   const { user, userProfile, supabase } = useAuth();
   const [loading, setLoading] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -60,7 +61,14 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
       }
 
       alert('Perfil salvo com sucesso!');
-      onOpenChange(false);
+      
+      // Chamar callback se fornecido
+      if (onProfileSaved) {
+        onProfileSaved();
+      } else {
+        onOpenChange(false);
+      }
+      
       // Não fazer reload, deixar o contexto atualizar naturalmente
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
@@ -77,9 +85,21 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isFirstTime ? 'Complete seu Perfil' : 'Editar Perfil'}
+          <DialogTitle className="flex items-center gap-2">
+            {isFirstTime ? (
+              <>
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                Complete seu Perfil
+              </>
+            ) : (
+              'Editar Perfil'
+            )}
           </DialogTitle>
+          {isFirstTime && (
+            <p className="text-sm text-muted-foreground">
+              Para continuar usando o aplicativo, você precisa completar seu perfil com suas informações pessoais.
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-4">
@@ -120,13 +140,17 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
           {/* Nome */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="firstName">Nome *</Label>
+              <Label htmlFor="firstName">
+                Nome * 
+                {isFirstTime && !firstName.trim() && <span className="text-red-500 ml-1">Obrigatório</span>}
+              </Label>
               <Input
                 id="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="João"
                 required
+                className={isFirstTime && !firstName.trim() ? 'border-red-500' : ''}
               />
             </div>
             <div>
@@ -172,7 +196,7 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
 
           <Button
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || (isFirstTime && !firstName.trim())}
             className="w-full"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -187,6 +211,12 @@ export const ProfileModal = ({ open, onOpenChange, isFirstTime = false }: Profil
             >
               Cancelar
             </Button>
+          )}
+
+          {isFirstTime && (
+            <p className="text-xs text-muted-foreground text-center">
+              ⚠️ Você não poderá usar o aplicativo até completar seu perfil
+            </p>
           )}
         </div>
       </DialogContent>

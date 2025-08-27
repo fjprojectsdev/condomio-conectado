@@ -17,16 +17,15 @@ const Home = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAuthFallback, setShowAuthFallback] = useState(false);
-  const { user, userProfile, logout, loading } = useAuth();
+  const { user, userProfile, logout, loading, profileIncomplete } = useAuth();
 
-  // Verificar se é primeiro login (sempre false para evitar loops)
-  const isFirstTime = false;
-  
+  // Forçar edição de perfil se estiver incompleto
   useEffect(() => {
-    if (isFirstTime && !showProfileModal) {
+    if (user && !loading && profileIncomplete) {
+      console.log('⚠️ Perfil incompleto detectado, forçando edição...');
       setShowProfileModal(true);
     }
-  }, [isFirstTime, showProfileModal]);
+  }, [user, loading, profileIncomplete]);
 
   // Detectar loading infinito
   useEffect(() => {
@@ -117,7 +116,8 @@ const Home = () => {
     loading, 
     user: user?.email || 'nenhum', 
     userProfile: userProfile?.full_name || 'nenhum',
-    hasValidUser: !!(user && user.id && user.email)
+    hasValidUser: !!(user && user.id && user.email),
+    profileIncomplete
   });
   
   
@@ -134,6 +134,13 @@ const Home = () => {
   const handleLoginSuccess = () => {
     console.log('✅ Login realizado com sucesso! Modal será fechado automaticamente.');
     // Não precisamos mais do setIsAuthenticated, o AuthContext já gerencia isso
+  };
+
+  // Função para quando o perfil for salvo
+  const handleProfileSaved = () => {
+    console.log('✅ Perfil salvo com sucesso! Modal será fechado.');
+    setShowProfileModal(false);
+    // O AuthContext irá atualizar automaticamente o profileIncomplete
   };
   
   // Se não estiver carregando E não estiver autenticado, mostrar tela de login
@@ -189,7 +196,7 @@ const Home = () => {
         <ProfileModal
           open={showProfileModal}
           onOpenChange={setShowProfileModal}
-          isFirstTime={isFirstTime}
+          isFirstTime={false}
         />
       </div>
     );
@@ -226,116 +233,118 @@ const Home = () => {
   // Se chegou aqui, o usuário está logado - mostrar o app normal
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-             {/* Header */}
-       <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-4 sm:p-6 lg:p-8 shadow-xl">
-         <div className="flex justify-between items-center text-white">
-           <div className="text-center flex-1">
-             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 tracking-tight">Condomínio Conectado</h1>
-             <p className="text-blue-100 text-sm sm:text-base lg:text-lg font-medium">Seu lar, nossa prioridade</p>
-           </div>
-          
-          {/* User Info */}
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10 border-2 border-primary-foreground/20">
-              <AvatarImage src={userProfile?.avatar_url} />
-              <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground">
-                {userProfile?.first_name?.charAt(0) || user.email?.charAt(0) || 'U'}
-                {userProfile?.last_name?.charAt(0) || ''}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex items-center space-x-2">
-              <div className="text-right">
-                <div className="text-sm font-medium">
-                  {userProfile?.full_name || user.email?.split('@')[0] || 'Usuário'}
-                </div>
-                <div className="text-xs text-primary-foreground/70">
-                  {userProfile?.apartamento || 'Perfil incompleto'}
-                </div>
-              </div>
-              <ThemeToggle />
-              <NotificationBadge />
-              <Button
-                onClick={() => setShowProfileModal(true)}
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20 transition-all duration-200"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                onClick={logout}
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20 transition-all duration-200"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-4 sm:p-6 lg:p-8 shadow-xl">
+        <div className="flex flex-col sm:flex-row justify-between items-center text-white space-y-4 sm:space-y-0">
+          <div className="text-center flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 sm:mb-3 tracking-tight">Condomínio Conectado</h1>
+            <p className="text-blue-100 text-xs sm:text-sm lg:text-base xl:text-lg font-medium">Seu lar, nossa prioridade</p>
           </div>
+         
+         {/* User Info */}
+         <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
+           <Avatar className="h-10 w-10 border-2 border-primary-foreground/20">
+             <AvatarImage src={userProfile?.avatar_url} />
+             <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground">
+               {userProfile?.first_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+               {userProfile?.last_name?.charAt(0) || ''}
+             </AvatarFallback>
+           </Avatar>
+           
+           {/* User Info Text */}
+           <div className="text-center sm:text-right">
+             <div className="text-sm font-medium">
+               {userProfile?.full_name || user.email?.split('@')[0] || 'Usuário'}
+             </div>
+             <div className="text-xs text-primary-foreground/70">
+               {userProfile?.apartamento || 'Perfil incompleto'}
+             </div>
+           </div>
+           
+           {/* Action Buttons - Mobile: vertical, Desktop: horizontal */}
+           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+             <ThemeToggle />
+             <NotificationBadge />
+             <Button
+               onClick={() => setShowProfileModal(true)}
+               variant="ghost"
+               size="sm"
+               className="text-white hover:bg-white/20 transition-all duration-200"
+             >
+               <Edit className="h-4 w-4" />
+             </Button>
+             <Button
+               onClick={logout}
+               variant="ghost"
+               size="sm"
+               className="text-white hover:bg-white/20 transition-all duration-200"
+             >
+               <LogOut className="h-4 w-4" />
+             </Button>
+           </div>
+         </div>
+       </div>
+     </div>
+
+      {/* Menu Grid */}
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-7xl mx-auto">
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Card 
+                key={item.title}
+                className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
+              >
+                {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
+                {item.badge && (
+                  <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
+                    {item.badge}
+                  </div>
+                )}
+                <Button
+                  onClick={() => navigate(item.route)}
+                  className="w-full h-full p-3 sm:p-4 lg:p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-2 sm:gap-3 lg:gap-4 rounded-xl sm:rounded-2xl transition-all duration-300"
+                  variant="ghost"
+                >
+                  <div className={`${item.color} p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
+                    <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </Button>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
-
-
-             {/* Menu Grid */}
-       <div className="p-4 sm:p-6 lg:p-8">
-         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-7xl mx-auto">
-           {menuItems.map((item) => {
-             const IconComponent = item.icon;
-             return (
-               <Card 
-                 key={item.title}
-                 className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
-               >
-                 {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
-                 {item.badge && (
-                   <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
-                     {item.badge}
-                   </div>
-                 )}
-                 <Button
-                   onClick={() => navigate(item.route)}
-                   className="w-full h-full p-3 sm:p-4 lg:p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-2 sm:gap-3 lg:gap-4 rounded-xl sm:rounded-2xl transition-all duration-300"
-                   variant="ghost"
-                 >
-                   <div className={`${item.color} p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
-                     <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
-                   </div>
-                   <div className="text-center">
-                     <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
-                       {item.title}
-                     </h3>
-                     <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                       {item.description}
-                     </p>
-                   </div>
-                 </Button>
-               </Card>
-             );
-           })}
-         </div>
-       </div>
-
-
-             {/* Admin Access */}
-       <div className="p-4 sm:p-6 pt-0">
-         <div className="max-w-4xl mx-auto">
-           <Button
-             onClick={() => navigate("/admin/login")}
-             variant="outline"
-             className="w-full text-xs text-muted-foreground border-dashed"
-           >
-             Acesso Administrativo
-           </Button>
-         </div>
-       </div>
-      
-      <ProfileModal
-        open={showProfileModal}
-        onOpenChange={setShowProfileModal}
-        isFirstTime={isFirstTime}
-      />
-    </div>
+      {/* Admin Access */}
+      <div className="p-4 sm:p-6 pt-0">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            onClick={() => navigate("/admin/login")}
+            variant="outline"
+            className="w-full text-xs text-muted-foreground border-dashed"
+          >
+            Acesso Administrativo
+          </Button>
+        </div>
+      </div>
+     
+     <ProfileModal
+       open={showProfileModal}
+       onOpenChange={setShowProfileModal}
+       isFirstTime={profileIncomplete}
+       onProfileSaved={handleProfileSaved}
+     />
+   </div>
   );
 };
 

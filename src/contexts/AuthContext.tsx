@@ -20,6 +20,7 @@ interface UserProfile {
   full_name?: string;
   apartamento?: string;
   telefone?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +38,7 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   userRole: UserRole | null;
   loading: boolean;
+  profileIncomplete: boolean;
   logout: () => Promise<void>;
   clearCorruptedSession: () => Promise<void>;
   isAdmin: () => boolean;
@@ -67,6 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -79,6 +82,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setUserProfile(null);
         setUserRole(null);
+        setProfileIncomplete(false);
         setLoading(false);
         hasInitialized = true;
       }
@@ -167,6 +171,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUser(null);
             setUserProfile(null);
             setUserRole(null);
+            setProfileIncomplete(false);
           }
           
           // Só definir loading como false se ainda não foi inicializado
@@ -211,12 +216,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           throw profileError;
         }
         
-        if (savedProfile && savedProfile.first_name) {
-          console.log('✅ Perfil encontrado:', savedProfile.full_name);
+        if (savedProfile && savedProfile.first_name && savedProfile.first_name.trim() !== '') {
+          console.log('✅ Perfil completo encontrado:', savedProfile.full_name);
           setUserProfile(savedProfile);
+          setProfileIncomplete(false);
         } else {
-          console.log('⚠️ Perfil sem nome, criando básico...');
-          throw new Error('Perfil sem nome válido');
+          console.log('⚠️ Perfil incompleto ou sem nome válido');
+          // Criar perfil básico temporário
+          const basicProfile = { 
+            id: userId,
+            email: userToUse?.email,
+            full_name: userToUse?.email?.split('@')[0] || 'Usuário',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          setUserProfile(basicProfile);
+          setProfileIncomplete(true);
         }
       } catch (profileError) {
         console.log('📝 Criando perfil básico para usuário:', userId);
@@ -257,6 +272,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setUserProfile(null);
       setUserRole(null);
+      setProfileIncomplete(false);
       
       // Fazer logout no Supabase
       await supabase.auth.signOut();
@@ -287,6 +303,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setUserProfile(null);
       setUserRole(null);
+      setProfileIncomplete(false);
       setLoading(false);
       
       // Limpar dados locais
@@ -389,6 +406,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     userProfile,
     userRole,
     loading,
+    profileIncomplete,
     logout,
     clearCorruptedSession,
     isAdmin,

@@ -21,6 +21,7 @@ interface Message {
   image?: string;
   timestamp: any;
   createdAt?: string;
+  reactions?: { [emoji: string]: string[] };
 }
 
 export const useChat = (roomId: string = 'geral') => {
@@ -28,6 +29,96 @@ export const useChat = (roomId: string = 'geral') => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Função para carregar reações de uma mensagem
+  const loadMessageReactions = async (messageId: string) => {
+    try {
+      const { data: reactions, error } = await supabase
+        .from('chat_reactions')
+        .select('emoji, user_id')
+        .eq('message_id', messageId);
+      
+      if (error) {
+        console.error('Erro ao carregar reações:', error);
+        return {};
+      }
+      
+      // Agrupar reações por emoji
+      const groupedReactions: { [emoji: string]: string[] } = {};
+      reactions?.forEach(reaction => {
+        if (!groupedReactions[reaction.emoji]) {
+          groupedReactions[reaction.emoji] = [];
+        }
+        groupedReactions[reaction.emoji].push(reaction.user_id);
+      });
+      
+      return groupedReactions;
+    } catch (error) {
+      console.error('Erro ao carregar reações:', error);
+      return {};
+    }
+  };
+
+  // Função para adicionar/remover reação
+  const toggleReaction = async (messageId: string, emoji: string) => {
+    if (!user) return;
+    
+    try {
+      // Verificar se já existe a reação
+      const { data: existingReaction, error: checkError } = await supabase
+        .from('chat_reactions')
+        .select('id')
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .eq('emoji', emoji)
+        .single();
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Erro ao verificar reação existente:', checkError);
+        return;
+      }
+      
+      if (existingReaction) {
+        // Remover reação existente
+        const { error: deleteError } = await supabase
+          .from('chat_reactions')
+          .delete()
+          .eq('id', existingReaction.id);
+        
+        if (deleteError) {
+          console.error('Erro ao remover reação:', deleteError);
+          return;
+        }
+      } else {
+        // Adicionar nova reação
+        const { error: insertError } = await supabase
+          .from('chat_reactions')
+          .insert({
+            message_id: messageId,
+            user_id: user.id,
+            emoji: emoji
+          });
+        
+        if (insertError) {
+          console.error('Erro ao adicionar reação:', insertError);
+          return;
+        }
+      }
+      
+      // Recarregar reações da mensagem
+      const updatedReactions = await loadMessageReactions(messageId);
+      
+      // Atualizar mensagem localmente
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, reactions: updatedReactions }
+          : msg
+      ));
+      
+    } catch (error) {
+      console.error('Erro ao alternar reação:', error);
+    }
+  };
 
   useEffect(() => {
     console.log('🔄 useChat: Iniciando listener para sala:', roomId);
@@ -61,20 +152,24 @@ export const useChat = (roomId: string = 'geral') => {
         
         if (existingMessages) {
           // Converter para o formato esperado e reverter ordem
-          const formattedMessages = existingMessages
-            .map(msg => ({
-              id: msg.id,
-              text: msg.text || '',
-              userId: msg.user_id,
-              userName: msg.user_name || 'Usuário',
-              userAvatar: msg.user_avatar || '',
-              image: msg.image || '',
-              timestamp: msg.timestamp,
-              createdAt: msg.created_at
-            }))
-            .reverse(); // Reverter para ordem cronológica
+          const formattedMessages = await Promise.all(
+            existingMessages.map(async (msg) => {
+              const reactions = await loadMessageReactions(msg.id);
+              return {
+                id: msg.id,
+                text: msg.text || '',
+                userId: msg.user_id,
+                userName: msg.user_name || 'Usuário',
+                userAvatar: msg.user_avatar || '',
+                image: msg.image || '',
+                timestamp: msg.timestamp,
+                createdAt: msg.created_at,
+                reactions
+              };
+            })
+          );
           
-          setMessages(formattedMessages);
+          setMessages(formattedMessages.reverse()); // Reverter para ordem cronológica
         }
         
         setLoading(false);
@@ -98,102 +193,76 @@ export const useChat = (roomId: string = 'geral') => {
           table: 'chat_messages',
           filter: `room_id=eq.${roomId}`
         }, 
-        (payload) => {
-          console.log('👂 Nova mensagem detectada via listener:', payload);
+        async (payload) => {
+          console.log('📨 Nova mensagem recebida:', payload.new);
           
-          const newMessage = {
-            id: payload.new.id,
-            text: payload.new.text || '',
-            userId: payload.new.user_id,
-            userName: payload.new.user_name || 'Usuário',
-            userAvatar: payload.new.user_avatar || '',
-            image: payload.new.image || '',
-            timestamp: payload.new.timestamp,
-            createdAt: payload.new.created_at
-          };
-          
-          setMessages(prev => [...prev, newMessage]);
-          setError(null);
+          if (payload.new) {
+            const newMessage = payload.new;
+            const reactions = await loadMessageReactions(newMessage.id);
+            
+            const formattedMessage: Message = {
+              id: newMessage.id,
+              text: newMessage.text || '',
+              userId: newMessage.user_id,
+              userName: newMessage.user_name || 'Usuário',
+              userAvatar: newMessage.user_avatar || '',
+              image: newMessage.image || '',
+              timestamp: newMessage.timestamp,
+              createdAt: newMessage.created_at,
+              reactions
+            };
+            
+            setMessages(prev => [...prev, formattedMessage]);
+          }
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Status da subscription:', status);
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Listener ativo para sala:', roomId);
-        }
-      });
+      .subscribe();
 
     return () => {
       console.log('🔄 useChat: Limpando listener para sala:', roomId);
       subscription.unsubscribe();
     };
-  }, [roomId, supabase, user]);
+  }, [roomId, user, supabase]);
 
-  const sendMessage = async (text: string, userId: string, userName: string, userAvatar?: string, image?: string) => {
-    if (!text.trim() && !image) {
-      console.warn('⚠️ Tentativa de enviar mensagem vazia');
-      return;
-    }
-
-    if (!user) {
-      console.error('❌ Usuário não autenticado');
-      setError('Usuário não autenticado');
-      return;
-    }
-
+  const sendMessage = async (
+    text: string, 
+    userId: string, 
+    userName: string, 
+    userAvatar?: string, 
+    image?: string
+  ) => {
+    if (!text.trim() && !image) return;
+    
     try {
-      console.log('📤 Enviando mensagem:', { 
-        text: text?.substring(0, 50) + (text?.length > 50 ? '...' : ''), 
-        userId, 
-        userName,
-        hasImage: !!image 
-      });
-      
-      const messageData = {
-        room_id: roomId,
-        text: text || '',
-        user_id: userId,
-        user_name: userName,
-        user_avatar: userAvatar || '',
-        image: image || '',
-        timestamp: new Date().toISOString(),
-        created_at: new Date().toISOString()
-      };
-      
-      const { data, error: insertError } = await supabase
+      const { error } = await supabase
         .from('chat_messages')
-        .insert([messageData])
-        .select()
-        .single();
-      
-      if (insertError) {
-        console.error('❌ Erro ao inserir mensagem:', insertError);
-        throw insertError;
+        .insert([{
+          room_id: roomId,
+          text: text.trim(),
+          user_id: userId,
+          user_name: userName,
+          user_avatar: userAvatar,
+          image: image,
+          timestamp: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.error('❌ Erro ao enviar mensagem:', error);
+        throw error;
       }
       
-      console.log('✅ Mensagem enviada com sucesso! ID:', data.id);
-      
-      // A mensagem será adicionada automaticamente via listener
-      // Mas podemos adicionar localmente para feedback imediato
-      const localMessage: Message = {
-        id: data.id,
-        text: text || '',
-        userId,
-        userName,
-        userAvatar: userAvatar || '',
-        image: image || '',
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      };
-      
-      setMessages(prev => [...prev, localMessage]);
-      
+      console.log('✅ Mensagem enviada com sucesso');
     } catch (error) {
       console.error('❌ Erro ao enviar mensagem:', error);
-      setError('Erro ao enviar mensagem');
       throw error;
     }
   };
 
-  return { messages, loading, sendMessage, error };
+  return {
+    messages,
+    sendMessage,
+    loading,
+    error,
+    toggleReaction
+  };
 };

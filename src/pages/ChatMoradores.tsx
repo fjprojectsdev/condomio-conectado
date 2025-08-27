@@ -15,7 +15,7 @@ import EmojiPicker from 'emoji-picker-react';
 const ChatMoradores = () => {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
-  const { messages, sendMessage, loading: chatLoading, error: chatError } = useChat('geral');
+  const { messages, sendMessage, loading: chatLoading, error: chatError, toggleReaction } = useChat('geral');
   const [newMessage, setNewMessage] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,8 +66,7 @@ const ChatMoradores = () => {
   };
 
   const handleReaction = (messageId: string, emoji: string) => {
-    // TODO: Implementar reações no Firebase
-    console.log('Reação:', messageId, emoji);
+    toggleReaction(messageId, emoji);
   };
 
   const formatTime = (timestamp: any) => {
