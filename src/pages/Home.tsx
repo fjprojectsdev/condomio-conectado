@@ -261,15 +261,15 @@ const Home = () => {
              </div>
            </div>
            
-           {/* Action Buttons - Mobile: vertical, Desktop: horizontal */}
-           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+           {/* Action Buttons - Mobile: horizontal com space-evenly, Desktop: horizontal com space-x */}
+           <div className="flex flex-row sm:flex-row items-center justify-evenly sm:justify-start w-full sm:w-auto space-x-2 sm:space-x-2 min-w-[280px] sm:min-w-0 flex-wrap-nowrap">
              <ThemeToggle />
              <NotificationBadge />
              <Button
                onClick={() => setShowProfileModal(true)}
                variant="ghost"
                size="sm"
-               className="text-white hover:bg-white/20 transition-all duration-200"
+               className="text-white hover:bg-white/20 transition-all duration-200 flex-1 sm:flex-none"
              >
                <Edit className="h-4 w-4" />
              </Button>
@@ -277,7 +277,7 @@ const Home = () => {
                onClick={logout}
                variant="ghost"
                size="sm"
-               className="text-white hover:bg-white/20 transition-all duration-200"
+               className="text-white hover:bg-white/20 transition-all duration-200 flex-1 sm:flex-none"
              >
                <LogOut className="h-4 w-4" />
              </Button>

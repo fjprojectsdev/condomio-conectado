@@ -1,0 +1,5 @@
+[33mf1bf4a9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m  Implementar melhorias completas: interface mobile otimizada, notificações inteligentes, dashboard administrativo e Firebase Cloud Messaging
+[33md5d6ae5[m  Corrigir modo escuro na tela principal e adicionar painel administrativo para gerenciar chat
+[33m76802ea[m  Implementar melhorias: tema escuro para todos, layout mobile otimizado, permissões admin e sistema de reações funcionando
+[33md05e311[m  Corrigir erro de coluna status - criar script fix-sugestoes-table.sql
+[33m0c45f1c[m  Corrigir sistema de sugestões - criar tabela e configurações Supabase
