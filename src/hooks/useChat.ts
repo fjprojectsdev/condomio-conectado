@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { chatDb } from '../lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   collection, 
   addDoc, 
@@ -8,9 +8,9 @@ import {
   onSnapshot,
   serverTimestamp,
   limit,
-  startAfter,
-  getDocs
-} from 'firebase/firestore';
+  getDocs,
+  Timestamp
+} from '@supabase/supabase-js';
 
 interface Message {
   id: string;
@@ -24,6 +24,7 @@ interface Message {
 }
 
 export const useChat = (roomId: string = 'geral') => {
+  const { supabase, user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,23 +32,51 @@ export const useChat = (roomId: string = 'geral') => {
   useEffect(() => {
     console.log('🔄 useChat: Iniciando listener para sala:', roomId);
     
+    if (!user) {
+      console.log('⚠️ Usuário não autenticado, não é possível carregar chat');
+      setLoading(false);
+      return;
+    }
+    
     // Primeiro, vamos carregar mensagens existentes
     const loadExistingMessages = async () => {
       try {
-        const q = query(
-          collection(chatDb, 'chats', roomId, 'messages'),
-          orderBy('timestamp', 'desc'),
-          limit(50)
-        );
+        console.log('📖 Carregando mensagens existentes...');
         
-        const snapshot = await getDocs(q);
-        const existingMessages = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Message[];
+        const { data: existingMessages, error: loadError } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('room_id', roomId)
+          .order('timestamp', { ascending: false })
+          .limit(50);
         
-        console.log('📚 Mensagens existentes carregadas:', existingMessages.length);
-        setMessages(existingMessages.reverse()); // Reverter para ordem cronológica
+        if (loadError) {
+          console.error('❌ Erro ao carregar mensagens existentes:', loadError);
+          setError('Erro ao carregar mensagens');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('📚 Mensagens existentes carregadas:', existingMessages?.length || 0);
+        
+        if (existingMessages) {
+          // Converter para o formato esperado e reverter ordem
+          const formattedMessages = existingMessages
+            .map(msg => ({
+              id: msg.id,
+              text: msg.text || '',
+              userId: msg.user_id,
+              userName: msg.user_name || 'Usuário',
+              userAvatar: msg.user_avatar || '',
+              image: msg.image || '',
+              timestamp: msg.timestamp,
+              createdAt: msg.created_at
+            }))
+            .reverse(); // Reverter para ordem cronológica
+          
+          setMessages(formattedMessages);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('❌ Erro ao carregar mensagens existentes:', error);
@@ -60,38 +89,55 @@ export const useChat = (roomId: string = 'geral') => {
     loadExistingMessages();
 
     // Depois configurar o listener em tempo real
-    const q = query(
-      collection(chatDb, 'chats', roomId, 'messages'),
-      orderBy('timestamp', 'asc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log('👂 Listener ativo - Nova mensagem detectada');
-      
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Message[];
-      
-      console.log('📨 Mensagens atualizadas via listener:', newMessages.length);
-      setMessages(newMessages);
-      setLoading(false);
-      setError(null);
-    }, (error) => {
-      console.error('❌ Erro no listener do chat:', error);
-      setError('Erro na conexão em tempo real');
-      setLoading(false);
-    });
+    const subscription = supabase
+      .channel(`chat:${roomId}`)
+      .on('postgres_changes', 
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'chat_messages',
+          filter: `room_id=eq.${roomId}`
+        }, 
+        (payload) => {
+          console.log('👂 Nova mensagem detectada via listener:', payload);
+          
+          const newMessage = {
+            id: payload.new.id,
+            text: payload.new.text || '',
+            userId: payload.new.user_id,
+            userName: payload.new.user_name || 'Usuário',
+            userAvatar: payload.new.user_avatar || '',
+            image: payload.new.image || '',
+            timestamp: payload.new.timestamp,
+            createdAt: payload.new.created_at
+          };
+          
+          setMessages(prev => [...prev, newMessage]);
+          setError(null);
+        }
+      )
+      .subscribe((status) => {
+        console.log('📡 Status da subscription:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Listener ativo para sala:', roomId);
+        }
+      });
 
     return () => {
       console.log('🔄 useChat: Limpando listener para sala:', roomId);
-      unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [roomId]);
+  }, [roomId, supabase, user]);
 
   const sendMessage = async (text: string, userId: string, userName: string, userAvatar?: string, image?: string) => {
     if (!text.trim() && !image) {
       console.warn('⚠️ Tentativa de enviar mensagem vazia');
+      return;
+    }
+
+    if (!user) {
+      console.error('❌ Usuário não autenticado');
+      setError('Usuário não autenticado');
       return;
     }
 
@@ -104,27 +150,39 @@ export const useChat = (roomId: string = 'geral') => {
       });
       
       const messageData = {
+        room_id: roomId,
         text: text || '',
-        userId,
-        userName,
-        userAvatar: userAvatar || '',
+        user_id: userId,
+        user_name: userName,
+        user_avatar: userAvatar || '',
         image: image || '',
-        timestamp: serverTimestamp(),
-        createdAt: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        created_at: new Date().toISOString()
       };
       
-      const docRef = await addDoc(collection(chatDb, 'chats', roomId, 'messages'), messageData);
-      console.log('✅ Mensagem enviada com sucesso! ID:', docRef.id);
+      const { data, error: insertError } = await supabase
+        .from('chat_messages')
+        .insert([messageData])
+        .select()
+        .single();
       
-      // Adicionar a mensagem localmente para feedback imediato
+      if (insertError) {
+        console.error('❌ Erro ao inserir mensagem:', insertError);
+        throw insertError;
+      }
+      
+      console.log('✅ Mensagem enviada com sucesso! ID:', data.id);
+      
+      // A mensagem será adicionada automaticamente via listener
+      // Mas podemos adicionar localmente para feedback imediato
       const localMessage: Message = {
-        id: docRef.id,
+        id: data.id,
         text: text || '',
         userId,
         userName,
         userAvatar: userAvatar || '',
         image: image || '',
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
       
