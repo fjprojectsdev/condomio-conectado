@@ -10,7 +10,8 @@ const ThemeToggle = () => {
       onClick={toggleTheme}
       variant="ghost"
       size="sm"
-      className="text-primary-foreground hover:bg-primary-foreground/10"
+      className="text-white hover:bg-white/20 transition-all duration-200"
+      title={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
     >
       {theme === 'light' ? (
         <Moon className="h-4 w-4" />

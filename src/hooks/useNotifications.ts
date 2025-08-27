@@ -23,31 +23,41 @@ export const useNotifications = () => {
 
     const loadNotifications = async () => {
       try {
-        // Simular notificações para demonstração
-        // Em produção, isso viria do banco de dados
-        const mockNotifications: Notification[] = [
-          {
-            id: '1',
-            type: 'encomenda',
-            title: 'Nova encomenda',
-            message: 'Você tem uma encomenda na portaria',
-            read: false,
-            createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 min atrás
-            link: '/encomendas'
-          },
-          {
-            id: '2',
-            type: 'comunicado',
-            title: 'Comunicado importante',
-            message: 'Manutenção programada para amanhã',
-            read: false,
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2h atrás
-            link: '/comunicados'
-          }
-        ];
+        // Carregar notificações do localStorage
+        const savedNotifications = localStorage.getItem('notifications');
+        let notificationsToLoad: Notification[];
+        
+        if (savedNotifications) {
+          notificationsToLoad = JSON.parse(savedNotifications).map((n: any) => ({
+            ...n,
+            createdAt: new Date(n.createdAt)
+          }));
+        } else {
+          // Notificações padrão se não houver salvas
+          notificationsToLoad = [
+            {
+              id: '1',
+              type: 'encomenda',
+              title: 'Nova encomenda',
+              message: 'Você tem uma encomenda na portaria',
+              read: false,
+              createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 min atrás
+              link: '/encomendas'
+            },
+            {
+              id: '2',
+              type: 'comunicado',
+              title: 'Comunicado importante',
+              message: 'Manutenção programada para amanhã',
+              read: false,
+              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2h atrás
+              link: '/comunicados'
+            }
+          ];
+        }
 
-        setNotifications(mockNotifications);
-        setUnreadCount(mockNotifications.filter(n => !n.read).length);
+        setNotifications(notificationsToLoad);
+        setUnreadCount(notificationsToLoad.filter(n => !n.read).length);
         setLoading(false);
       } catch (error) {
         console.error('Erro ao carregar notificações:', error);
@@ -61,19 +71,17 @@ export const useNotifications = () => {
   // Marcar notificação como lida
   const markAsRead = async (notificationId: string) => {
     try {
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
-            ? { ...notif, read: true }
-            : notif
-        )
+      const updatedNotifications = notifications.map(notif => 
+        notif.id === notificationId 
+          ? { ...notif, read: true }
+          : notif
       );
       
-      // Atualizar contador de não lidas
+      setNotifications(updatedNotifications);
       setUnreadCount(prev => Math.max(0, prev - 1));
       
-      // Em produção, salvar no banco de dados
-      // await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
+      // Salvar no localStorage
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
       
     } catch (error) {
       console.error('Erro ao marcar notificação como lida:', error);
@@ -83,13 +91,13 @@ export const useNotifications = () => {
   // Marcar todas como lidas
   const markAllAsRead = async () => {
     try {
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, read: true }))
-      );
+      const updatedNotifications = notifications.map(notif => ({ ...notif, read: true }));
+      
+      setNotifications(updatedNotifications);
       setUnreadCount(0);
       
-      // Em produção, salvar no banco de dados
-      // await supabase.from('notifications').update({ read: true }).eq('user_id', user.id);
+      // Salvar no localStorage
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
       
     } catch (error) {
       console.error('Erro ao marcar todas como lidas:', error);
@@ -105,8 +113,12 @@ export const useNotifications = () => {
       read: false
     };
 
-    setNotifications(prev => [newNotification, ...prev]);
+    const updatedNotifications = [newNotification, ...notifications];
+    setNotifications(updatedNotifications);
     setUnreadCount(prev => prev + 1);
+    
+    // Salvar no localStorage
+    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
   };
 
   // Remover notificação
@@ -117,10 +129,11 @@ export const useNotifications = () => {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
 
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+      setNotifications(updatedNotifications);
       
-      // Em produção, remover do banco de dados
-      // await supabase.from('notifications').delete().eq('id', notificationId);
+      // Salvar no localStorage
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
       
     } catch (error) {
       console.error('Erro ao remover notificação:', error);

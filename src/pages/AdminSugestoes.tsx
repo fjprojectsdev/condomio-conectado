@@ -4,15 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { chatDb } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const AdminSugestoes = ({ embedded = false }: { embedded?: boolean }) => {
   const navigate = useNavigate();
-  const { } = useAuth();
+  const { supabase, isAdmin } = useAuth();
   const [sugestoes, setSugestoes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSugestao, setSelectedSugestao] = useState(null);
@@ -25,20 +23,17 @@ const AdminSugestoes = ({ embedded = false }: { embedded?: boolean }) => {
 
   const fetchSugestoes = async () => {
     try {
-      const q = query(
-        collection(chatDb, 'sugestoes'),
-        orderBy('created_at', 'desc')
-      );
+      const { data: sugestoesData, error } = await supabase
+        .from('sugestoes')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const sugestoesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setSugestoes(sugestoesData);
-      });
+      if (error) {
+        console.error('Erro ao buscar sugestões:', error);
+        return;
+      }
       
-      return unsubscribe;
+      setSugestoes(sugestoesData || []);
     } catch (error) {
       console.error('Erro ao buscar sugestões:', error);
     }
@@ -52,14 +47,55 @@ const AdminSugestoes = ({ embedded = false }: { embedded?: boolean }) => {
         updateData.resposta_admin = respostaAdmin;
       }
 
-      await updateDoc(doc(chatDb, 'sugestoes', sugestaoId), updateData);
+      const { error } = await supabase
+        .from('sugestoes')
+        .update(updateData)
+        .eq('id', sugestaoId);
+
+      if (error) {
+        throw error;
+      }
 
       alert('Status atualizado com sucesso!');
       setSelectedSugestao(null);
       setResposta('');
+      
+      // Recarregar sugestões
+      fetchSugestoes();
     } catch (error) {
       console.error('Erro ao atualizar:', error);
       alert('Erro ao atualizar status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSugestao = async (sugestaoId: string) => {
+    if (!isAdmin()) {
+      alert('Você não tem permissão para deletar sugestões');
+      return;
+    }
+
+    if (!confirm('Tem certeza que deseja deletar esta sugestão?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('sugestoes')
+        .delete()
+        .eq('id', sugestaoId);
+
+      if (error) {
+        throw error;
+      }
+
+      alert('Sugestão deletada com sucesso!');
+      fetchSugestoes();
+    } catch (error) {
+      console.error('Erro ao deletar sugestão:', error);
+      alert('Erro ao deletar sugestão');
     } finally {
       setLoading(false);
     }
@@ -168,6 +204,18 @@ const AdminSugestoes = ({ embedded = false }: { embedded?: boolean }) => {
                   >
                     Atualizar
                   </Button>
+
+                  {isAdmin() && (
+                    <Button
+                      onClick={() => handleDeleteSugestao(sugestao.id)}
+                      disabled={loading}
+                      size="sm"
+                      variant="destructive"
+                      title="Deletar sugestão"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
 
                 {selectedSugestao === sugestao.id && (

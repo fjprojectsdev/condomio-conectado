@@ -226,13 +226,13 @@ const Home = () => {
   // Se chegou aqui, o usuário está logado - mostrar o app normal
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-8 shadow-xl">
-        <div className="flex justify-between items-center text-white">
-          <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold mb-3 tracking-tight">Condomínio Conectado</h1>
-            <p className="text-blue-100 text-lg font-medium">Seu lar, nossa prioridade</p>
-          </div>
+             {/* Header */}
+       <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-4 sm:p-6 lg:p-8 shadow-xl">
+         <div className="flex justify-between items-center text-white">
+           <div className="text-center flex-1">
+             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 tracking-tight">Condomínio Conectado</h1>
+             <p className="text-blue-100 text-sm sm:text-base lg:text-lg font-medium">Seu lar, nossa prioridade</p>
+           </div>
           
           {/* User Info */}
           <div className="flex items-center space-x-3">
@@ -277,58 +277,58 @@ const Home = () => {
 
 
 
-      {/* Menu Grid */}
-      <div className="p-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {menuItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <Card 
-                key={item.title}
-                className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-2xl transform hover:-translate-y-1"
-              >
-                {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
-                {item.badge && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
-                    {item.badge}
-                  </div>
-                )}
-                <Button
-                  onClick={() => navigate(item.route)}
-                  className="w-full h-full p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-4 rounded-2xl transition-all duration-300"
-                  variant="ghost"
-                >
-                  <div className={`${item.color} p-4 rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
-                    <IconComponent className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-base font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+             {/* Menu Grid */}
+       <div className="p-4 sm:p-6 lg:p-8">
+         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-7xl mx-auto">
+           {menuItems.map((item) => {
+             const IconComponent = item.icon;
+             return (
+               <Card 
+                 key={item.title}
+                 className="group p-0 overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
+               >
+                 {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
+                 {item.badge && (
+                   <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
+                     {item.badge}
+                   </div>
+                 )}
+                 <Button
+                   onClick={() => navigate(item.route)}
+                   className="w-full h-full p-3 sm:p-4 lg:p-6 bg-transparent hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50 text-left flex flex-col items-center gap-2 sm:gap-3 lg:gap-4 rounded-xl sm:rounded-2xl transition-all duration-300"
+                   variant="ghost"
+                 >
+                   <div className={`${item.color} p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110`}>
+                     <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
+                   </div>
+                   <div className="text-center">
+                     <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                       {item.title}
+                     </h3>
+                     <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                       {item.description}
+                     </p>
+                   </div>
+                 </Button>
+               </Card>
+             );
+           })}
+         </div>
+       </div>
 
 
-      {/* Admin Access */}
-      <div className="p-6 pt-0">
-        <div className="max-w-4xl mx-auto">
-          <Button
-            onClick={() => navigate("/admin/login")}
-            variant="outline"
-            className="w-full text-xs text-muted-foreground border-dashed"
-          >
-            Acesso Administrativo
-          </Button>
-        </div>
-      </div>
+             {/* Admin Access */}
+       <div className="p-4 sm:p-6 pt-0">
+         <div className="max-w-4xl mx-auto">
+           <Button
+             onClick={() => navigate("/admin/login")}
+             variant="outline"
+             className="w-full text-xs text-muted-foreground border-dashed"
+           >
+             Acesso Administrativo
+           </Button>
+         </div>
+       </div>
       
       <ProfileModal
         open={showProfileModal}

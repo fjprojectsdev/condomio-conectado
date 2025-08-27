@@ -41,6 +41,8 @@ interface AuthContextType {
   clearCorruptedSession: () => Promise<void>;
   isAdmin: () => boolean;
   isSindico: () => boolean;
+  canDeleteMessages: () => boolean;
+  canModifyUserData: () => boolean;
   hasPermission: (permission: string) => boolean;
   supabase: typeof supabase;
   loginAsAdmin: () => void;
@@ -310,6 +312,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return userRole?.role === 'admin' || userRole?.role === 'sindico';
   };
 
+  const canDeleteMessages = () => {
+    // Apenas fjprojects2025@gmail.com pode deletar mensagens
+    return user?.email === 'fjprojects2025@gmail.com';
+  };
+
+  const canModifyUserData = () => {
+    // Apenas fjprojects2025@gmail.com pode modificar dados de usuários
+    return user?.email === 'fjprojects2025@gmail.com';
+  };
+
   const isSindico = () => {
     return userRole?.role === 'sindico';
   };
@@ -381,6 +393,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     clearCorruptedSession,
     isAdmin,
     isSindico,
+    canDeleteMessages,
+    canModifyUserData,
     hasPermission,
     supabase,
     loginAsAdmin

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import MessageReactions from '@/components/MessageReactions';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatMoradores = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ChatMoradores = () => {
   const [newMessage, setNewMessage] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -56,6 +58,11 @@ const ChatMoradores = () => {
       reader.onload = (e) => setImagePreview(e.target?.result as string);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleEmojiClick = (emojiObject: any) => {
+    setNewMessage(prev => prev + emojiObject.emoji);
+    setShowEmojiPicker(false);
   };
 
   const handleReaction = (messageId: string, emoji: string) => {
@@ -350,22 +357,39 @@ const ChatMoradores = () => {
             <Paperclip className="h-5 w-5 text-gray-600" />
           </Button>
           
-          <div className="flex-1 relative">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Digite sua mensagem aqui..."
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              className="rounded-full pr-12 bg-gray-50 border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-500 h-12 text-base"
-            />
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 rounded-full p-1"
-            >
-              <Smile className="h-5 w-5 text-gray-500" />
-            </Button>
-          </div>
+                       <div className="flex-1 relative">
+               <Input
+                 value={newMessage}
+                 onChange={(e) => setNewMessage(e.target.value)}
+                 placeholder="Digite sua mensagem aqui..."
+                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                 className="rounded-full pr-12 bg-gray-50 border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-500 h-12 text-base"
+               />
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                 className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 rounded-full p-1"
+                 title="Inserir emoji"
+               >
+                 <Smile className="h-5 w-5 text-gray-500" />
+               </Button>
+               
+               {/* Emoji Picker */}
+               {showEmojiPicker && (
+                 <div className="absolute bottom-full right-0 mb-2 z-50">
+                   <EmojiPicker
+                     onEmojiClick={handleEmojiClick}
+                     width={300}
+                     height={400}
+                     searchPlaceholder="Buscar emoji..."
+                     previewConfig={{
+                       showPreview: false
+                     }}
+                   />
+                 </div>
+               )}
+             </div>
           
           <Button 
             onClick={handleSend} 

@@ -7,12 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, Image, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { chatDb } from '@/lib/firebase';
-import { collection, addDoc, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 
 const CaixaSugestoes = () => {
   const navigate = useNavigate();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, supabase } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sugestoes, setSugestoes] = useState([]);
@@ -30,21 +28,18 @@ const CaixaSugestoes = () => {
     if (!user) return;
     
     try {
-      const q = query(
-        collection(chatDb, 'sugestoes'),
-        where('user_id', '==', user.id),
-        orderBy('created_at', 'desc')
-      );
+      const { data: sugestoesData, error } = await supabase
+        .from('sugestoes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
       
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const sugestoesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setSugestoes(sugestoesData);
-      });
+      if (error) {
+        console.error('Erro ao buscar sugestões:', error);
+        return;
+      }
       
-      return unsubscribe;
+      setSugestoes(sugestoesData || []);
     } catch (error) {
       console.error('Erro ao buscar sugestões:', error);
     }
@@ -58,21 +53,29 @@ const CaixaSugestoes = () => {
 
     setLoading(true);
     try {
-      await addDoc(collection(chatDb, 'sugestoes'), {
-        user_id: user?.id,
-        user_name: userProfile?.full_name || user?.email?.split('@')[0] || 'Usuário',
-        titulo,
-        descricao,
-        imagem,
-        status: 'Recebida',
-        created_at: new Date().toISOString()
-      });
+      const { error } = await supabase
+        .from('sugestoes')
+        .insert([{
+          user_id: user?.id,
+          user_name: userProfile?.full_name || user?.email?.split('@')[0] || 'Usuário',
+          titulo,
+          descricao,
+          imagem,
+          status: 'Recebida'
+        }]);
+
+      if (error) {
+        throw error;
+      }
 
       alert('Sugestão enviada com sucesso!');
       setTitulo('');
       setDescricao('');
       setImagem('');
       setShowForm(false);
+      
+      // Recarregar sugestões
+      fetchMinhasSugestoes();
     } catch (error) {
       console.error('Erro ao enviar sugestão:', error);
       alert('Erro ao enviar sugestão');
