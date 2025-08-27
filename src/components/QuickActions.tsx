@@ -7,25 +7,8 @@ const QuickActions = () => {
   const navigate = useNavigate();
 
   const quickActions = [
-    {
-      title: "Agendar Salão",
-      icon: Calendar,
-      color: "bg-yellow-500 hover:bg-yellow-600",
-      route: "/salao-festas"
-    },
-    {
-      title: "Novo Anúncio",
-      icon: ShoppingBag,
-      color: "bg-yellow-500 hover:bg-yellow-600",
-      route: "/classificados"
-    },
-    {
-      title: "Enviar Sugestão",
-      icon: Lightbulb,
-      color: "bg-blue-500 hover:bg-blue-600",
-      route: "/caixa-sugestoes"
-    }
-  ];
+  // Removed "Agendar Salão", "Novo Anúncio", "Enviar Sugestão"
+];
 
   return (
     <Card className="mb-8 bg-white shadow-xl rounded-2xl border-0">
