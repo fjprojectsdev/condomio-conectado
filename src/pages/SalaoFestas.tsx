@@ -519,47 +519,7 @@ const AgendamentoCard = ({
           </div>
         </div>
         
-        <div className="flex gap-2">
-          {(isAdmin || agendamento.status === 'pendente') && (
-            <Button
-              onClick={() => onEdit(agendamento)}
-              variant="outline"
-              size="sm"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
-          {isAdmin && (
-            <>
-              {agendamento.status === 'pendente' && (
-                <>
-                  <Button
-                    onClick={() => onStatusChange(agendamento.id, 'confirmado')}
-                    size="sm"
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                  >
-                    Confirmar
-                  </Button>
-                  <Button
-                    onClick={() => onStatusChange(agendamento.id, 'cancelado')}
-                    size="sm"
-                    className="bg-red-500 hover:bg-red-600 text-white"
-                  >
-                    Cancelar
-                  </Button>
-                </>
-              )}
-              <Button
-                onClick={() => onDelete(agendamento.id)}
-                variant="outline"
-                size="sm"
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
+        {/* Ações removidas da página pública; gerenciadas apenas no painel administrativo */}
       </div>
       
       <div className="space-y-2">

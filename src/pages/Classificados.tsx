@@ -418,14 +418,7 @@ const Classificados = () => {
                       <MapPin className="h-4 w-4" />
                       {classificado.bloco ? `Bloco ${classificado.bloco} • Apt ${classificado.apartamento}` : `Apt ${classificado.apartamento}`}
                     </div>
-                    <Button
-                      onClick={() => handleDelete(classificado.id)}
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto text-green-600 hover:text-green-700"
-                    >
-                      Marcar como Vendido
-                    </Button>
+                    {/* Botão de marcar como vendido removido da página pública */}
                   </div>
                   
                   <div className="text-xs text-muted-foreground">
@@ -433,26 +426,7 @@ const Classificados = () => {
                   </div>
                 </div>
                 
-                {/* Só mostra botões de edição/exclusão para admin ou se for o próprio anúncio */}
-                {isAdminLoggedIn && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleEdit(classificado)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(classificado.id)}
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
+                {/* Ações de editar/excluir removidas da página pública */}
               </div>
             </Card>
           ))}
