@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { auth } from '../lib/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth'; // Adicionado import para o onAuthStateChanged
 
 const SUPABASE_URL = "https://ddzmibbhtjrgzdgflujg.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkem1pYmJodGpyZ3pkZ2ZsdWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NDc0NDUsImV4cCI6MjA3MDAyMzQ0NX0.lB6bQ--g86TIwDkvo6n-pOKONsNYfxMTBvZUH-fBvNk";
@@ -75,6 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     let isMounted = true;
     let hasInitialized = false;
     let authTimeout: NodeJS.Timeout;
+    let firebaseUnsubscribe: (() => void) | null = null;
     
     // Função para limpar estado e parar loading
     const clearAuthState = () => {
@@ -102,31 +105,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('📋 Resposta do getSession:', { session, error });
+        console.log('📋 Resposta do getSession Supabase:', { session, error });
         
         // Limpar timeout se chegou aqui
         clearTimeout(authTimeout);
         
         if (error) {
-          console.error('❌ Erro ao verificar sessão:', error);
-          clearAuthState();
-          return;
+          console.error('❌ Erro ao verificar sessão Supabase:', error);
+          // Não limpar estado ainda, verificar Firebase
         }
         
-        // Verificação mais rigorosa da sessão
+        // Verificação mais rigorosa da sessão Supabase
         if (session && session.user && session.access_token) {
           // Verificar se o token não expirou
           const now = Math.floor(Date.now() / 1000);
           const tokenExp = session.expires_at;
           
           if (tokenExp && now > tokenExp) {
-            console.log('⏰ Token expirado, fazendo logout automático');
+            console.log('⏰ Token Supabase expirado, fazendo logout automático');
             await supabase.auth.signOut();
             clearAuthState();
             return;
           }
           
-          console.log('✅ Usuário válido encontrado:', session.user.email);
+          console.log('✅ Usuário Supabase válido encontrado:', session.user.email);
           console.log('🔑 Token válido:', !!session.access_token);
           
           if (isMounted) {
@@ -136,26 +138,68 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             hasInitialized = true;
           }
         } else {
-          console.log('❌ Nenhuma sessão válida encontrada');
+          console.log('❌ Nenhuma sessão Supabase válida encontrada');
           console.log('   - Session exists:', !!session);
           console.log('   - User exists:', !!session?.user);
           console.log('   - Token exists:', !!session?.access_token);
-          clearAuthState();
+          // Não limpar estado ainda, verificar Firebase
         }
       } catch (error) {
-        console.error('💥 Erro inesperado ao verificar sessão:', error);
+        console.error('💥 Erro inesperado ao verificar sessão Supabase:', error);
         clearTimeout(authTimeout);
-        clearAuthState();
+        // Não limpar estado ainda, verificar Firebase
       }
     };
 
-    getSession();
+    // Configurar listener do Firebase Auth
+    const setupFirebaseAuth = () => {
+      console.log('🔥 Configurando listener do Firebase Auth...');
+      
+      firebaseUnsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+        console.log('🔥 Firebase Auth state change:', firebaseUser?.email);
+        
+        if (!isMounted) return;
+        
+        if (firebaseUser) {
+          console.log('✅ Usuário Firebase logado:', firebaseUser.email);
+          console.log('🔑 UID Firebase:', firebaseUser.uid);
+          
+          // Converter usuário Firebase para formato compatível
+          const userData = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            created_at: firebaseUser.metadata.creationTime || new Date().toISOString()
+          };
+          
+          setUser(userData);
+          
+          // Buscar perfil do usuário no Supabase
+          await fetchUserProfile(firebaseUser.uid, userData);
+          
+          if (!hasInitialized) {
+            setLoading(false);
+            hasInitialized = true;
+          }
+        } else {
+          console.log('❌ Nenhum usuário Firebase logado');
+          
+          // Se não há usuário Firebase e não há sessão Supabase, limpar estado
+          if (!hasInitialized) {
+            clearAuthState();
+          }
+        }
+      });
+    };
 
-    // Escutar mudanças de autenticação com debounce
+    // Inicializar verificações
+    getSession();
+    setupFirebaseAuth();
+
+    // Escutar mudanças de autenticação Supabase com debounce
     let authChangeTimeout: NodeJS.Timeout;
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state change:', event, session?.user?.email);
+        console.log('🔄 Supabase Auth state change:', event, session?.user?.email);
         
         if (!isMounted) return;
         
@@ -168,10 +212,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUser(session.user);
             await fetchUserProfile(session.user.id, session.user);
           } else {
-            setUser(null);
-            setUserProfile(null);
-            setUserRole(null);
-            setProfileIncomplete(false);
+            // Verificar se há usuário Firebase antes de limpar
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+              setUser(null);
+              setUserProfile(null);
+              setUserRole(null);
+              setProfileIncomplete(false);
+            }
           }
           
           // Só definir loading como false se ainda não foi inicializado
@@ -187,6 +235,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       isMounted = false;
       clearTimeout(authTimeout);
       clearTimeout(authChangeTimeout);
+      if (firebaseUnsubscribe) {
+        firebaseUnsubscribe();
+      }
       subscription.unsubscribe();
     };
   }, []);
@@ -268,14 +319,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       console.log('🚪 Fazendo logout...');
       
-      // Limpar todos os estados locais primeiro
+      // Fazer logout do Firebase
+      try {
+        await auth.signOut();
+        console.log('✅ Logout do Firebase realizado');
+      } catch (firebaseError) {
+        console.error('❌ Erro no logout do Firebase:', firebaseError);
+      }
+      
+      // Fazer logout do Supabase (se houver sessão)
+      try {
+        await supabase.auth.signOut();
+        console.log('✅ Logout do Supabase realizado');
+      } catch (supabaseError) {
+        console.error('❌ Erro no logout do Supabase:', supabaseError);
+      }
+      
+      // Limpar todos os estados locais
       setUser(null);
       setUserProfile(null);
       setUserRole(null);
       setProfileIncomplete(false);
-      
-      // Fazer logout no Supabase
-      await supabase.auth.signOut();
       
       // Limpar dados locais para garantir
       localStorage.removeItem('supabase.auth.token');
@@ -296,8 +360,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       console.log('🧹 Limpando sessão corrompida...');
       
-      // Forçar logout
-      await supabase.auth.signOut();
+      // Forçar logout do Firebase
+      try {
+        await auth.signOut();
+        console.log('✅ Logout do Firebase realizado');
+      } catch (firebaseError) {
+        console.error('❌ Erro no logout do Firebase:', firebaseError);
+      }
+      
+      // Forçar logout do Supabase
+      try {
+        await supabase.auth.signOut();
+        console.log('✅ Logout do Supabase realizado');
+      } catch (supabaseError) {
+        console.error('❌ Erro no logout do Supabase:', supabaseError);
+      }
       
       // Limpar estados
       setUser(null);
