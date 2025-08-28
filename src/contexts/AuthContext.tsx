@@ -333,18 +333,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUserProfile(basicProfile);
       }
       
-      // Definir papel baseado no email
-      const role: 'admin' | 'sindico' | 'morador' = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
-      const userRoleData: UserRole = { 
-        id: `role-${userId}`,
-        user_id: userId,
-        role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      console.log('👤 Papel definido:', role);
-      setUserRole(userRoleData);
+      // Buscar role do banco de dados em vez de criar local
+      try {
+        console.log('🔍 Buscando role do usuário no banco de dados...');
+        const { data: userRoleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        
+        if (roleError) {
+          console.log('⚠️ Erro ao buscar role:', roleError.message);
+          // Se não encontrar role, criar uma baseada no email (temporária)
+          const role: 'admin' | 'sindico' | 'morador' = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
+          console.log('👤 Criando role temporária:', role);
+          
+          const tempRoleData: UserRole = { 
+            id: `role-${userId}`,
+            user_id: userId,
+            role,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          setUserRole(tempRoleData);
+        } else {
+          console.log('✅ Role encontrada no banco:', userRoleData.role);
+          setUserRole(userRoleData);
+        }
+      } catch (roleError) {
+        console.error('❌ Erro ao buscar role:', roleError);
+        // Fallback para role baseada no email
+        const role: 'admin' | 'sindico' | 'morador' = userToUse?.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
+        console.log('👤 Usando role de fallback:', role);
+        
+        const fallbackRoleData: UserRole = { 
+          id: `role-${userId}`,
+          user_id: userId,
+          role,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setUserRole(fallbackRoleData);
+      }
       
     } catch (error) {
       console.error('❌ Erro ao configurar perfil:', error);

@@ -46,8 +46,8 @@ export const useGoogleAuth = () => {
         // Criar ou atualizar usuário no Supabase
         await createOrUpdateUserInSupabase(firebaseUser);
 
-        // Simular login no contexto (mantém compatibilidade)
-        loginAsAdmin();
+        // NÃO chamar loginAsAdmin automaticamente - deixar o sistema definir a role
+        // loginAsAdmin(); // REMOVIDO - causava promoção automática a admin
         
         console.log('🎉 Login com Google concluído com sucesso!');
         return { user: firebaseUser, error: null };
@@ -98,8 +98,8 @@ export const useGoogleAuth = () => {
         // Criar ou atualizar usuário no Supabase
         await createOrUpdateUserInSupabase(firebaseUser);
         
-        // Simular login no contexto
-        loginAsAdmin();
+        // NÃO chamar loginAsAdmin automaticamente - deixar o sistema definir a role
+        // loginAsAdmin(); // REMOVIDO - causava promoção automática a admin
         
         return { user: firebaseUser, error: null };
       }
