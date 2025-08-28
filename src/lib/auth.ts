@@ -20,22 +20,54 @@ export async function signUp(email: string, password: string): Promise<AuthRespo
   try {
     console.log('🚀 Iniciando cadastro para:', email);
     
+    // Determinar a URL de redirecionamento baseada no ambiente
+    const redirectUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:8080/auth/callback'
+      : 'https://condominioconectado.netlify.app/auth/callback';
+    
+    console.log('📧 URL de redirecionamento:', redirectUrl);
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         // URL para onde o usuário será redirecionado após confirmar o email
-        emailRedirectTo: `${window.location.origin}/auth/callback`
+        emailRedirectTo: redirectUrl,
+        data: {
+          // Metadata adicional para o usuário
+          signup_method: 'email_password'
+        }
       }
     });
     
     if (error) {
       console.error('❌ Erro no cadastro:', error);
+      
+      // Tratamento específico de erros comuns
+      if (error.message.includes('Email signups are disabled')) {
+        return { 
+          user: null, 
+          error: { 
+            message: 'Cadastros por email estão desabilitados. Entre em contato com o administrador.' 
+          } 
+        };
+      }
+      
+      if (error.message.includes('User already registered')) {
+        return { 
+          user: null, 
+          error: { 
+            message: 'Este email já está cadastrado. Tente fazer login ou use outro email.' 
+          } 
+        };
+      }
+      
       return { user: data?.user, error };
     }
     
-    console.log('✅ Cadastro realizado. Verificar email:', data.user?.email);
-    console.log('📧 Link de confirmação enviado para o email');
+    console.log('✅ Cadastro realizado com sucesso!');
+    console.log('📧 Email de confirmação enviado para:', data.user?.email);
+    console.log('🔗 Link de confirmação enviado para o email');
     
     return { user: data.user, error: null };
   } catch (err) {

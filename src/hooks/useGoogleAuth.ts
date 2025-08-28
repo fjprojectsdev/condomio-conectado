@@ -1,44 +1,35 @@
 import { useState } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useGoogleAuth = () => {
   const [loading, setLoading] = useState(false);
-  const { supabase, loginAsAdmin } = useAuth();
+  const { loginAsAdmin } = useAuth();
 
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const firebaseUser = result.user;
+      // Usar Supabase OAuth com Google em vez do Firebase
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
 
-      // Criar usuário com dados do Google
-      const adminUser = {
-        id: firebaseUser.uid,
-        email: firebaseUser.email,
-        created_at: new Date().toISOString()
-      };
-      
-      // Simular login no contexto
-      loginAsAdmin();
-      
-      // Opcional: Salvar no Supabase para histórico
-      try {
-        await supabase.from('users').upsert({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          full_name: firebaseUser.displayName,
-          avatar_url: firebaseUser.photoURL,
-          provider: 'google'
-        });
-      } catch (supabaseError) {
-        console.log('Erro ao salvar no Supabase (não crítico):', supabaseError);
+      if (error) {
+        console.error('❌ Erro no login com Google:', error);
+        return { user: null, error };
       }
 
-      return { user: firebaseUser, error: null };
+      console.log('✅ Redirecionamento para Google OAuth iniciado');
+      return { user: null, error: null };
     } catch (error: any) {
+      console.error('💥 Erro inesperado no login com Google:', error);
       return { user: null, error };
     } finally {
       setLoading(false);
