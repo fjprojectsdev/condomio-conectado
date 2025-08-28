@@ -171,11 +171,15 @@ export const useGoogleAuth = () => {
 
       // Criar ou atualizar role do usuário
       try {
+        // Definir role baseado no email - apenas fjprojects2025@gmail.com é admin
+        const userRole = firebaseUser.email === 'fjprojects2025@gmail.com' ? 'admin' : 'morador';
+        console.log('👤 Definindo role do usuário:', userRole, 'para email:', firebaseUser.email);
+        
         const { error: roleError } = await supabase
           .from('user_roles')
           .upsert({
             user_id: firebaseUser.uid,
-            role: 'morador', // Role padrão para novos usuários
+            role: userRole, // Role baseada no email, não mais sempre 'morador'
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }, {
@@ -185,7 +189,7 @@ export const useGoogleAuth = () => {
         if (roleError) {
           console.error('❌ Erro ao configurar role do usuário:', roleError);
         } else {
-          console.log('✅ Role do usuário configurada com sucesso!');
+          console.log('✅ Role do usuário configurada com sucesso:', userRole);
         }
       } catch (roleError) {
         console.error('❌ Erro ao configurar role:', roleError);

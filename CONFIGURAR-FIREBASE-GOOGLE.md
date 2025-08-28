@@ -150,3 +150,36 @@ Para confirmar que está funcionando:
 - ✅ Google OAuth está ativo em Firebase > Authentication > Sign-in method
 - ✅ URLs estão corretas no Google Cloud Console
 - ✅ Teste funciona tanto no navegador quanto no PWA instalado
+
+## 🚨 CORRIGIR USUÁRIOS EXISTENTES
+
+Se você já criou usuários que foram incorretamente definidos como "admin":
+
+### 1️⃣ Executar Script de Correção:
+1. Acesse: https://supabase.com/dashboard/project/ddzmibbhtjrgzdgflujg/sql
+2. Execute o script: `CORRIGIR-USUARIOS-ADMIN.sql`
+3. Este script corrige automaticamente todos os usuários
+
+### 2️⃣ Verificar Correção:
+- Apenas `fjprojects2025@gmail.com` deve ter role "admin"
+- Todos os outros usuários devem ter role "morador"
+- Novos usuários Google serão automaticamente "morador"
+
+### 3️⃣ Regras de Role Implementadas:
+- **Admin**: Apenas `fjprojects2025@gmail.com`
+- **Morador**: Todos os outros usuários (padrão)
+- **Síndico**: Pode ser configurado manualmente se necessário
+
+## 📋 RESUMO DAS ALTERAÇÕES
+
+### ✅ O que foi corrigido:
+1. **Novos usuários Google** são criados como "morador" por padrão
+2. **Apenas fjprojects2025@gmail.com** pode ser admin
+3. **Script de correção** para usuários existentes incorretos
+4. **Detecção automática** de PWA vs navegador
+5. **Google OAuth funcionando** sem erro 403
+
+### 🔒 Segurança:
+- Usuários não podem se promover a admin
+- Role é definida automaticamente baseada no email
+- Sistema previne criação acidental de admins
