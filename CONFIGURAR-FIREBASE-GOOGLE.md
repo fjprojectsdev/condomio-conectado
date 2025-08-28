@@ -1,22 +1,35 @@
-# 🔥 Configuração do Firebase para Google OAuth
+# 🔥 Configuração do Firebase para Google OAuth (PWA)
 
-## 🎯 SOLUÇÃO IMPLEMENTADA
-- **Firebase**: Para autenticação com Google OAuth
-- **Supabase**: Para banco de dados e perfil dos usuários
-- **Integração**: Usuários logados via Google são automaticamente criados/atualizados no Supabase
+## 🚨 PROBLEMA IDENTIFICADO E SOLUCIONADO
+O erro `403: disallowed_useragent` ocorre porque:
+- **PWA instalado** é detectado como WebView pelo Google
+- **Firebase desativa** autenticação por Dynamic Links em WebView a partir de agosto/2025
+- **Solução implementada**: Detecção automática de PWA + uso de `signInWithPopup` vs `signInWithRedirect`
 
 ## 📋 PASSOS PARA CONFIGURAR
 
-### 1️⃣ Verificar Configuração do Firebase
+### 1️⃣ Configurar Domínios Autorizados no Firebase
+
+**🚨 CRÍTICO**: Este é o passo mais importante para resolver o erro 403!
 
 1. **Acesse o Firebase Console:**
    - Vá para: https://console.firebase.google.com/
    - Selecione o projeto: `condominio-conectado-94f9f`
 
-2. **Verificar Authentication:**
-   - Vá para **Authentication** > **Sign-in method**
-   - **Google** deve estar ativo
-   - Se não estiver, clique em **Google** e ative
+2. **Vá para Authentication > Settings:**
+   - Clique em **Authentication** no menu lateral
+   - Clique na aba **Settings**
+   - Role para baixo até **Authorized domains**
+
+3. **Adicionar Domínios:**
+   - Clique em **Add domain**
+   - Adicione: `condominioconectado.netlify.app`
+   - Clique em **Add**
+   - **IMPORTANTE**: Aguarde alguns minutos para propagar
+
+4. **Verificar Domínios Atuais:**
+   - `condominio-conectado-94f9f.firebaseapp.com` (deve estar)
+   - `condominioconectado.netlify.app` (deve estar agora)
 
 ### 2️⃣ Configurar Google OAuth no Firebase
 
@@ -31,36 +44,14 @@
    - Configure o email de suporte
    - Clique em **Save**
 
-### 3️⃣ Verificar Credenciais do Google
-
-1. **No Firebase Console:**
-   - Vá para **Project Settings** (ícone de engrenagem)
-   - Aba **General**
-   - Seção **Your apps** > **Web app**
-
-2. **Verificar configuração:**
-   - **apiKey:** `AIzaSyBPbQuMvRIwk4dDkQmIvYf4IqcTCb61uv0`
-   - **authDomain:** `condominio-conectado-94f9f.firebaseapp.com`
-   - **projectId:** `condominio-conectado-94f9f`
-
-### 4️⃣ Configurar Google Cloud Console
+### 3️⃣ Verificar Google Cloud Console
 
 1. **Acesse Google Cloud Console:**
    - Vá para: https://console.cloud.google.com/
    - Selecione o projeto do Firebase
 
-2. **Verificar APIs ativas:**
-   - **APIs & Services** > **Library**
-   - **Google Identity and Access Management (IAM) API** deve estar ativa
-   - **Google+ API** deve estar ativa
-
-3. **Verificar credenciais OAuth:**
+2. **Verificar Credenciais OAuth:**
    - **APIs & Services** > **Credentials**
-   - Deve haver um **OAuth 2.0 Client ID** para web
-
-### 5️⃣ Configurar URLs Autorizadas
-
-1. **No Google Cloud Console > Credentials:**
    - Clique no **OAuth 2.0 Client ID** existente
    - **Authorized JavaScript origins:**
      ```
@@ -69,43 +60,51 @@
      http://localhost:8080
      ```
 
-2. **Authorized redirect URIs:**
-   - Deixe como está (gerado automaticamente pelo Firebase)
+## 🔧 SOLUÇÃO IMPLEMENTADA
 
-## 🔧 COMO FUNCIONA
+### Detecção Automática de PWA:
+```typescript
+// Detecta se é PWA instalado
+const isPWAInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                       (window.navigator as any).standalone === true;
+
+if (isPWAInstalled) {
+  // Para PWA: usa signInWithRedirect
+  await signInWithRedirect(auth, provider);
+} else {
+  // Para navegador: usa signInWithPopup
+  result = await signInWithPopup(auth, provider);
+}
+```
 
 ### Fluxo de Autenticação:
-1. **Usuário clica em "Entrar com Google"**
-2. **Firebase abre popup do Google OAuth**
-3. **Usuário autoriza no Google**
-4. **Firebase retorna dados do usuário**
-5. **Sistema cria/atualiza perfil no Supabase**
-6. **Usuário fica logado automaticamente**
-
-### Integração com Supabase:
-- **Tabela `profiles`:** Armazena dados do usuário
-- **Tabela `user_roles`:** Define permissões (padrão: 'morador')
-- **Dados sincronizados:** Nome, email, foto, etc.
+1. **Navegador normal**: `signInWithPopup` (funciona perfeitamente)
+2. **PWA instalado**: `signInWithRedirect` + `getRedirectResult` (evita WebView)
+3. **Integração automática** com Supabase para dados do usuário
 
 ## 🧪 TESTAR CONFIGURAÇÃO
 
-### 1️⃣ Teste Básico:
-1. Vá para o site
+### 1️⃣ Teste Básico (Navegador):
+1. Vá para o site no navegador
 2. Clique em "Entrar com Google"
-3. Deve abrir popup do Google
+3. Deve abrir popup do Google OAuth
 4. Após autorização, deve voltar para o site
 5. Usuário deve estar logado
 
-### 2️⃣ Verificar no Supabase:
+### 2️⃣ Teste PWA:
+1. Instale o PWA no dispositivo
+2. Abra o PWA instalado
+3. Clique em "Entrar com Google"
+4. Deve redirecionar para Google OAuth
+5. Após autorização, deve voltar para o PWA
+6. Usuário deve estar logado
+
+### 3️⃣ Verificar no Supabase:
 1. Acesse: https://supabase.com/dashboard/project/ddzmibbhtjrgzdgflujg/table-editor
 2. Tabela `profiles`: Deve ter o novo usuário
 3. Tabela `user_roles`: Deve ter role 'morador'
 
-### 3️⃣ Verificar no Firebase:
-1. Firebase Console > Authentication > Users
-2. Deve mostrar o usuário logado via Google
-
-## ❌ PROBLEMAS COMUNS
+## ❌ PROBLEMAS COMUNS E SOLUÇÕES
 
 ### Erro: "Popup blocked by browser"
 **Solução:** Permitir popups para o site
@@ -116,21 +115,38 @@
 ### Erro: "Invalid OAuth client"
 **Solução:** Verificar credenciais no Google Cloud Console
 
+### Erro: "Unauthorized domain"
+**Solução:** Adicionar `condominioconectado.netlify.app` em Firebase > Authentication > Settings > Authorized domains
+
 ### Usuário não aparece no Supabase
 **Solução:** Verificar logs do console do navegador para erros
 
-## 🚀 VANTAGENS DESTA SOLUÇÃO
+### PWA não funciona com Google OAuth
+**Solução:** A solução implementada detecta automaticamente PWA e usa redirect em vez de popup
 
-1. **✅ Google OAuth funcionando** via Firebase
-2. **✅ Banco de dados mantido** no Supabase
-3. **✅ Integração automática** entre os sistemas
-4. **✅ Sem perda de dados** existentes
-5. **✅ Funcionalidades existentes** preservadas
+## 🚀 VANTAGENS DA SOLUÇÃO IMPLEMENTADA
+
+1. **✅ Google OAuth funcionando** via Firebase (sem erro 403)
+2. **✅ PWA suportado** com detecção automática
+3. **✅ Banco de dados mantido** no Supabase
+4. **✅ Integração automática** entre os sistemas
+5. **✅ Sem perda de dados** existentes
+6. **✅ Funcionalidades existentes** preservadas
+7. **✅ Compatível com futuro** (após agosto/2025)
 
 ## 📞 SUPORTE
 
 Se precisar de ajuda:
-1. Verifique os logs do console do navegador
-2. Verifique o Firebase Console > Authentication > Users
-3. Verifique o Supabase Dashboard > Table Editor
-4. Entre em contato com o suporte do Firebase
+1. **Verifique os domínios autorizados** no Firebase (passo mais importante)
+2. Verifique os logs do console do navegador
+3. Verifique o Firebase Console > Authentication > Users
+4. Verifique o Supabase Dashboard > Table Editor
+5. Entre em contato com o suporte do Firebase
+
+## 🔍 VERIFICAÇÃO FINAL
+
+Para confirmar que está funcionando:
+- ✅ Domínio `condominioconectado.netlify.app` está em Firebase > Authentication > Settings > Authorized domains
+- ✅ Google OAuth está ativo em Firebase > Authentication > Sign-in method
+- ✅ URLs estão corretas no Google Cloud Console
+- ✅ Teste funciona tanto no navegador quanto no PWA instalado

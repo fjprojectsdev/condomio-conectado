@@ -91,6 +91,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     };
     
+    // Verificar resultado de redirect do Firebase (para PWA)
+    const checkFirebaseRedirect = async () => {
+      try {
+        console.log('🔄 Verificando resultado de redirect do Firebase...');
+        
+        // Importar getRedirectResult dinamicamente para evitar problemas de SSR
+        const { getRedirectResult } = await import('firebase/auth');
+        const result = await getRedirectResult(auth);
+        
+        if (result) {
+          const firebaseUser = result.user;
+          console.log('✅ Usuário retornou do redirect do Google:', firebaseUser.email);
+          
+          // Converter usuário Firebase para formato compatível
+          const userData = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            created_at: firebaseUser.metadata.creationTime || new Date().toISOString()
+          };
+          
+          setUser(userData);
+          
+          // Buscar perfil do usuário no Supabase
+          await fetchUserProfile(firebaseUser.uid, userData);
+          
+          if (!hasInitialized) {
+            setLoading(false);
+            hasInitialized = true;
+          }
+        }
+      } catch (error) {
+        console.log('ℹ️ Nenhum resultado de redirect ou erro:', error);
+      }
+    };
+    
     // Verificar sessão atual com timeout de segurança
     const getSession = async () => {
       if (!isMounted) return;
@@ -192,6 +227,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     // Inicializar verificações
+    checkFirebaseRedirect(); // Verificar redirect primeiro
     getSession();
     setupFirebaseAuth();
 
