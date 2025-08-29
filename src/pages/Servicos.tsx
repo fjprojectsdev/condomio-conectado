@@ -201,7 +201,7 @@ const Servicos = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation title="Serviços dos Moradores" />
+        <Navigation title="Serviços para o Condomínio" />
         <div className="p-6">
           <div className="text-center">Carregando serviços...</div>
         </div>
@@ -211,7 +211,7 @@ const Servicos = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation title="Serviços dos Moradores" />
+              <Navigation title="Serviços para o Condomínio" />
       
       <div className="p-6 space-y-6">
         {/* Header */}

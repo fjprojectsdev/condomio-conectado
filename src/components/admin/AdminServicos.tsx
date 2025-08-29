@@ -208,7 +208,7 @@ const AdminServicos = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold">Gerenciar Serviços dos Moradores</h2>
+          <h2 className="text-xl font-semibold">Gerenciar Serviços para o Condomínio</h2>
           <p className="text-muted-foreground">
             {services.length} serviço{services.length !== 1 ? 's' : ''} cadastrado{services.length !== 1 ? 's' : ''}
           </p>
@@ -395,7 +395,7 @@ const AdminServicos = () => {
           <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Nenhum serviço cadastrado</h3>
           <p className="text-muted-foreground mb-4">
-            Adicione serviços para que os moradores possam encontrar prestadores de serviços.
+            Adicione serviços para que o condomínio possa oferecer prestadores de serviços.
           </p>
           <Button 
             onClick={() => setShowAddForm(true)}

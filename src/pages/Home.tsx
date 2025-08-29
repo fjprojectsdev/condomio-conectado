@@ -71,7 +71,7 @@ const Home = () => {
       badge: null // Removido badge estático
     },
     {
-      title: "Serviços dos Moradores",
+              title: "Serviços para o Condomínio",
       icon: Wrench,
       description: "Profissionais do condomínio",
       color: "bg-gradient-to-br from-teal-400 to-teal-500", // Verde-azulado suave
@@ -285,6 +285,50 @@ const Home = () => {
          </div>
        </div>
      </div>
+
+      {/* Estatísticas do App */}
+      <div className="p-4 sm:p-6 lg:p-8 pt-0">
+        <div className="max-w-7xl mx-auto mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Usuários Ativos Hoje</p>
+                  <p className="text-2xl font-bold text-blue-800">24</p>
+                </div>
+                <User className="h-8 w-8 text-blue-600" />
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Novos Usuários</p>
+                  <p className="text-2xl font-bold text-green-800">3</p>
+                </div>
+                <User className="h-8 w-8 text-green-600" />
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-600">Total de Usuários</p>
+                  <p className="text-2xl font-bold text-purple-800">156</p>
+                </div>
+                <User className="h-8 w-8 text-purple-600" />
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Atividade Hoje</p>
+                  <p className="text-2xl font-bold text-orange-800">89</p>
+                </div>
+                <MessageCircle className="h-8 w-8 text-orange-600" />
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
 
       {/* Menu Grid */}
       <div className="p-4 sm:p-6 lg:p-8">

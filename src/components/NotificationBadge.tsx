@@ -130,17 +130,17 @@ export const NotificationBadge = () => {
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start space-x-3">
-                    <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                    <div className="flex-1 min-w-0">
+                    <span className="text-lg flex-shrink-0">{getNotificationIcon(notification.type)}</span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium text-gray-900 truncate">
+                        <h4 className="text-sm font-medium text-gray-900 break-words">
                           {notification.title}
                         </h4>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                           {formatTimeAgo(notification.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      <p className="text-sm text-gray-600 mt-1 break-words whitespace-normal">
                         {notification.message}
                       </p>
                       <div className="flex items-center justify-between mt-2">
@@ -159,7 +159,7 @@ export const NotificationBadge = () => {
                         e.stopPropagation();
                         removeNotification(notification.id);
                       }}
-                      className="h-6 w-6 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      className="h-6 w-6 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
