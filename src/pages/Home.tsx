@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
 
 import ThemeToggle from "@/components/ThemeToggle";
 import { NotificationBadge } from "@/components/NotificationBadge";
@@ -19,65 +18,6 @@ const Home = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAuthFallback, setShowAuthFallback] = useState(false);
   const { user, userProfile, logout, loading, profileIncomplete } = useAuth();
-
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    newUsers: 0,
-    onlineToday: 0,
-  });
-  const [statsLoading, setStatsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setStatsLoading(true);
-
-        // 1. Total de Usuários
-        const { count: totalUsersCount, error: totalUsersError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
-
-        if (totalUsersError) throw new Error(`Erro ao buscar total de usuários: ${totalUsersError.message}`);
-
-        // 2. Novos Usuários (últimos 7 dias)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const { count: newUsersCount, error: newUsersError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', sevenDaysAgo.toISOString());
-        
-        if (newUsersError) throw new Error(`Erro ao buscar novos usuários: ${newUsersError.message}`);
-
-        // 3. Online Hoje (últimas 24 horas)
-        const twentyFourHoursAgo = new Date();
-        twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-        const { count: onlineTodayCount, error: onlineTodayError } = await supabase
-          .from('auth.users') // Querying auth schema
-          .select('*', { count: 'exact', head: true })
-          .gte('last_sign_in_at', twentyFourHoursAgo.toISOString());
-
-        if (onlineTodayError) {
-            console.warn("Aviso: Não foi possível buscar 'usuários online hoje'. Isso pode ser devido a políticas de RLS na tabela 'auth.users'.", onlineTodayError.message);
-        }
-
-        setStats({
-          totalUsers: totalUsersCount || 0,
-          newUsers: newUsersCount || 0,
-          onlineToday: onlineTodayCount || 0,
-        });
-
-      } catch (error) {
-        console.error("Erro ao buscar estatísticas:", error);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-
-    if (user) { // Apenas busca estatísticas se o usuário estiver logado
-        fetchStats();
-    }
-  }, [user]);
 
   // Forçar edição de perfil se estiver incompleto
   useEffect(() => {
@@ -101,12 +41,16 @@ const Home = () => {
     }
   }, [loading]);
 
+  // Cores suaves e modernas por categoria:
+  // Verde suave → serviços (coleta, serviços moradores)
+  // Azul suave → comunicação (chat, comunicados, sugestões)
+  // Laranja suave → gestão (encomendas, salão, classificados)
   const menuItems = [
     {
       title: "Coleta de Lixo",
       icon: Trash2,
       description: "Dias de coleta",
-      color: "bg-gradient-to-br from-emerald-400 to-emerald-500",
+      color: "bg-gradient-to-br from-emerald-400 to-emerald-500", // Verde suave
       route: "/coleta-lixo",
       badge: null
     },
@@ -114,23 +58,23 @@ const Home = () => {
       title: "Encomendas",
       icon: Package,
       description: "Consultar encomendas",
-      color: "bg-gradient-to-br from-amber-400 to-orange-500",
+      color: "bg-gradient-to-br from-amber-400 to-orange-500", // Laranja suave
       route: "/encomendas",
-      badge: null
+      badge: null // Removido badge estático
     },
     {
       title: "Comunicados",
       icon: Megaphone,
       description: "Avisos da administração",
-      color: "bg-gradient-to-br from-blue-400 to-blue-500",
+      color: "bg-gradient-to-br from-blue-400 to-blue-500", // Azul suave
       route: "/comunicados",
-      badge: null
+      badge: null // Removido badge estático
     },
     {
               title: "Serviços para o Condomínio",
       icon: Wrench,
       description: "Profissionais do condomínio",
-      color: "bg-gradient-to-br from-teal-400 to-teal-500",
+      color: "bg-gradient-to-br from-teal-400 to-teal-500", // Verde-azulado suave
       route: "/servicos",
       badge: null
     },
@@ -138,7 +82,7 @@ const Home = () => {
       title: "Salão de Festas",
       icon: Calendar,
       description: "Agendar área de eventos",
-      color: "bg-gradient-to-br from-purple-400 to-purple-500",
+      color: "bg-gradient-to-br from-purple-400 to-purple-500", // Roxo suave
       route: "/salao-festas",
       badge: null
     },
@@ -146,7 +90,7 @@ const Home = () => {
       title: "Classificados",
       icon: ShoppingBag,
       description: "Compra, venda e serviços",
-      color: "bg-gradient-to-br from-pink-400 to-rose-500",
+      color: "bg-gradient-to-br from-pink-400 to-rose-500", // Rosa suave
       route: "/classificados",
       badge: null
     },
@@ -154,7 +98,7 @@ const Home = () => {
       title: "Chat dos Moradores",
       icon: MessageCircle,
       description: "Converse com seus vizinhos",
-      color: "bg-gradient-to-br from-cyan-400 to-blue-500",
+      color: "bg-gradient-to-br from-cyan-400 to-blue-500", // Ciano suave
       route: "/chat-moradores",
       badge: null
     },
@@ -162,23 +106,44 @@ const Home = () => {
       title: "Caixa de Sugestões",
       icon: Lightbulb,
       description: "Envie suas ideias e sugestões",
-      color: "bg-gradient-to-br from-yellow-400 to-amber-500",
+      color: "bg-gradient-to-br from-yellow-400 to-amber-500", // Amarelo suave
       route: "/caixa-sugestoes",
       badge: null
     }
   ];
 
-  const shouldShowLogin = !loading && (!user || !user.id);
+  console.log('🏠 Home - Estado atual:', { 
+    loading, 
+    user: user?.email || 'nenhum', 
+    userProfile: userProfile?.full_name || 'nenhum',
+    hasValidUser: !!(user && user.id && user.email),
+    profileIncomplete
+  });
   
+  
+  // Verificar se deve mostrar login baseado no usuário real
+  const shouldShowLogin = !loading && (!user || !user.id);
+  console.log('🔍 DEBUG - shouldShowLogin:', shouldShowLogin, { 
+    loading, 
+    hasUser: !!user, 
+    hasUserId: !!(user?.id), 
+    hasUserEmail: !!(user?.email) 
+  });
+  
+  // Função para autenticar usuário (chamada após login bem-sucedido)
   const handleLoginSuccess = () => {
     console.log('✅ Login realizado com sucesso! Modal será fechado automaticamente.');
+    // Não precisamos mais do setIsAuthenticated, o AuthContext já gerencia isso
   };
 
+  // Função para quando o perfil for salvo
   const handleProfileSaved = () => {
     console.log('✅ Perfil salvo com sucesso! Modal será fechado.');
     setShowProfileModal(false);
+    // O AuthContext irá atualizar automaticamente o profileIncomplete
   };
   
+  // Se não estiver carregando E não estiver autenticado, mostrar tela de login
   if (shouldShowLogin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -236,6 +201,7 @@ const Home = () => {
     );
   }
 
+  // Se estiver carregando, mostrar loading ou fallback
   if (loading) {
     if (showAuthFallback) {
       return (
@@ -263,6 +229,7 @@ const Home = () => {
     );
   }
 
+  // Se chegou aqui, o usuário está logado - mostrar o app normal
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
@@ -293,7 +260,7 @@ const Home = () => {
              </div>
            </div>
            
-           {/* Action Buttons */}
+           {/* Action Buttons - Mobile: horizontal com space-evenly, Desktop: horizontal com space-x */}
            <div className="flex flex-row sm:flex-row items-center justify-evenly sm:justify-start w-full sm:w-auto space-x-2 sm:space-x-2 min-w-[280px] sm:min-w-0 flex-wrap-nowrap">
              <ThemeToggle />
              <NotificationBadge />
@@ -326,7 +293,7 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Usuários Ativos Hoje</p>
-                  <p className="text-2xl font-bold text-blue-800">{statsLoading ? '...' : stats.onlineToday}</p>
+                  <p className="text-2xl font-bold text-blue-800">24</p>
                 </div>
                 <User className="h-8 w-8 text-blue-600" />
               </div>
@@ -335,7 +302,7 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Novos Usuários</p>
-                  <p className="text-2xl font-bold text-green-800">{statsLoading ? '...' : stats.newUsers}</p>
+                  <p className="text-2xl font-bold text-green-800">3</p>
                 </div>
                 <User className="h-8 w-8 text-green-600" />
               </div>
@@ -344,7 +311,7 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-600">Total de Usuários</p>
-                  <p className="text-2xl font-bold text-purple-800">{statsLoading ? '...' : stats.totalUsers}</p>
+                  <p className="text-2xl font-bold text-purple-800">156</p>
                 </div>
                 <User className="h-8 w-8 text-purple-600" />
               </div>
@@ -353,7 +320,7 @@ const Home = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-orange-600">Atividade Hoje</p>
-                  <p className="text-2xl font-bold text-orange-800">{statsLoading ? '...' : stats.onlineToday}</p>
+                  <p className="text-2xl font-bold text-orange-800">89</p>
                 </div>
                 <MessageCircle className="h-8 w-8 text-orange-600" />
               </div>
@@ -372,6 +339,7 @@ const Home = () => {
                 key={item.title}
                 className="group p-0 overflow-hidden bg-white dark:bg-slate-800 shadow-lg hover:shadow-2xl transition-all duration-300 border-0 relative rounded-xl sm:rounded-2xl transform hover:-translate-y-1"
               >
+                {/* Badge de notificação - VERSÃO ANTERIOR: absolute -top-3 -right-3 */}
                 {item.badge && (
                   <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full z-20 shadow-lg font-medium min-w-[20px] h-5 flex items-center justify-center">
                     {item.badge}

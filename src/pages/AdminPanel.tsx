@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdmin } from "@/context/AdminContext";
-import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag, Lightbulb, MessageCircle } from "lucide-react";
+import { LogOut, Package, Megaphone, Wrench, Calendar, ShoppingBag, Lightbulb, MessageCircle, LayoutDashboard } from "lucide-react";
+import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminComunicados from "@/components/admin/AdminComunicados";
 import { AdminEncomendas } from "@/components/admin/AdminEncomendas";
 import AdminServicos from "@/components/admin/AdminServicos";
@@ -39,7 +39,7 @@ const AdminPanel = () => {
         <div className="flex justify-between items-center">
           <div className="text-primary-foreground">
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-            <p className="opacity-90">Gerenciar comunicados, encomendas, serviços e agendamentos</p>
+            <p className="opacity-90">Dashboard, comunicados, encomendas, serviços e mais</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -63,8 +63,12 @@ const AdminPanel = () => {
 
       {/* Content */}
       <div className="p-6">
-        <Tabs defaultValue="comunicados" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 max-w-6xl">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8 max-w-7xl">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </TabsTrigger>
             <TabsTrigger value="comunicados" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
               Comunicados
@@ -94,6 +98,10 @@ const AdminPanel = () => {
               Chat
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            <AdminDashboard />
+          </TabsContent>
 
           <TabsContent value="comunicados" className="space-y-6">
             <AdminComunicados />
