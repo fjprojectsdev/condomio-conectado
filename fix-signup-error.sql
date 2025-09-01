@@ -8,6 +8,8 @@ ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_roles DISABLE ROW LEVEL SECURITY;
 
 -- 2. Remover todas as políticas existentes
+DROP POLICY IF EXISTS "allow_all_operations_profiles" ON public.profiles;
+DROP POLICY IF EXISTS "allow_all_operations_user_roles" ON public.user_roles;
 DROP POLICY IF EXISTS "allow_all_profiles" ON public.profiles;
 DROP POLICY IF EXISTS "allow_all_user_roles" ON public.user_roles;
 DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;

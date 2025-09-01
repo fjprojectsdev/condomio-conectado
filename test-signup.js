@@ -9,7 +9,7 @@ async function testSignup() {
   console.log('🧪 Testando cadastro de usuário...\n');
 
   // Email de teste único
-  const testEmail = `teste${Date.now()}@example.com`;
+  const testEmail = `teste${Date.now()}@test.com`;
   const testPassword = '123456789';
 
   console.log(`📧 Email de teste: ${testEmail}`);
@@ -111,25 +111,25 @@ async function testDatabaseConnectivity() {
   
   try {
     // Teste simples de conexão
-    const { data, error } = await supabase
+    const { count, error } = await supabase
       .from('profiles')
-      .select('count(*)', { count: 'exact' });
-    
+      .select('*', { count: 'exact', head: true });
+
     if (error) {
-      console.log('❌ Erro de conectividade:', error.message);
+      console.log('❌ Erro de conectividade com profiles:', error.message);
     } else {
-      console.log('✅ Conectividade OK - Profiles encontrados:', data.length);
+      console.log(`✅ Conectividade OK - Tabela 'profiles' acessível. Contagem: ${count}`);
     }
-    
+
     // Testar user_roles
-    const { data: rolesData, error: rolesError } = await supabase
+    const { count: rolesCount, error: rolesError } = await supabase
       .from('user_roles')
-      .select('count(*)', { count: 'exact' });
-    
+      .select('*', { count: 'exact', head: true });
+
     if (rolesError) {
-      console.log('❌ Erro user_roles:', rolesError.message);
+      console.log('❌ Erro de conectividade com user_roles:', rolesError.message);
     } else {
-      console.log('✅ User_roles OK - Registros encontrados:', rolesData.length);
+      console.log(`✅ Conectividade OK - Tabela 'user_roles' acessível. Contagem: ${rolesCount}`);
     }
     
   } catch (err) {
