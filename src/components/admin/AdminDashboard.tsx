@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Wifi } from "lucide-react";
+import { Users, UserPlus, Wifi, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -8,6 +8,7 @@ const AdminDashboard = () => {
     totalUsers: 0,
     newUsers: 0,
     onlineToday: 0,
+    activityToday: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +17,9 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         // 1. Total de Usuários
         const { count: totalUsersCount, error: totalUsersError } = await supabase
           .from('profiles')
@@ -23,13 +27,11 @@ const AdminDashboard = () => {
 
         if (totalUsersError) throw new Error(`Erro ao buscar total de usuários: ${totalUsersError.message}`);
 
-        // 2. Novos Usuários (últimos 7 dias)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        // 2. Novos Usuários (hoje)
         const { count: newUsersCount, error: newUsersError } = await supabase
           .from('profiles')
           .select('*', { count: 'exact', head: true })
-          .gte('created_at', sevenDaysAgo.toISOString());
+          .gte('created_at', today.toISOString());
         
         if (newUsersError) throw new Error(`Erro ao buscar novos usuários: ${newUsersError.message}`);
 
@@ -45,10 +47,19 @@ const AdminDashboard = () => {
             console.warn("Aviso: Não foi possível buscar 'usuários online hoje'. Isso pode ser devido a políticas de RLS na tabela 'auth.users'.", onlineTodayError.message);
         }
 
+        // 4. Atividade Hoje (mensagens no chat)
+        const { count: activityTodayCount, error: activityTodayError } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', today.toISOString());
+
+        if (activityTodayError) throw new Error(`Erro ao buscar atividade de hoje: ${activityTodayError.message}`);
+
         setStats({
           totalUsers: totalUsersCount || 0,
           newUsers: newUsersCount || 0,
           onlineToday: onlineTodayCount || 0,
+          activityToday: activityTodayCount || 0,
         });
 
       } catch (error) {
@@ -75,12 +86,12 @@ const AdminDashboard = () => {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Novos Usuários (7 dias)</CardTitle>
+          <CardTitle className="text-sm font-medium">Novos Usuários (hoje)</CardTitle>
           <UserPlus className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{loading ? "..." : stats.newUsers}</div>
-          <p className="text-xs text-muted-foreground">Usuários cadastrados na última semana</p>
+          <p className="text-xs text-muted-foreground">Usuários cadastrados hoje</p>
         </CardContent>
       </Card>
       <Card>
@@ -91,6 +102,16 @@ const AdminDashboard = () => {
         <CardContent>
           <div className="text-2xl font-bold">{loading ? "..." : stats.onlineToday}</div>
           <p className="text-xs text-muted-foreground">Usuários com atividade nas últimas 24h</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Atividade Hoje</CardTitle>
+          <MessageCircle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{loading ? "..." : stats.activityToday}</div>
+          <p className="text-xs text-muted-foreground">Mensagens no chat hoje</p>
         </CardContent>
       </Card>
     </div>
