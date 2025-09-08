@@ -35,7 +35,7 @@ const AdminPanel = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-primary p-6 shadow-elevated">
+      <div className="bg-gradient-primary p-6 shadow-elevated sticky top-0 z-40">
         <div className="flex justify-between items-center">
           <div className="text-primary-foreground">
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
@@ -62,9 +62,9 @@ const AdminPanel = () => {
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-6 relative z-0">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 max-w-7xl">
+          <TabsList className="grid w-full grid-cols-8 max-w-7xl bg-muted/60 backdrop-blur supports-[backdrop-filter]:bg-muted/40 sticky top-0 z-30">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
