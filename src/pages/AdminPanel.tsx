@@ -33,72 +33,75 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-40 md:pt-24">
-      {/* Header */}
-      <div className="bg-gradient-primary p-6 shadow-elevated">
-        <div className="flex justify-between items-center">
-          <div className="text-primary-foreground">
-            <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-            <p className="opacity-90">Dashboard, comunicados, encomendas, serviços e mais</p>
+    <div className="min-h-screen bg-background">
+      <Tabs defaultValue="dashboard" className="space-y-0">
+        {/* Faixa azul com título e menu */}
+        <div className="bg-gradient-primary p-6 shadow-elevated">
+          <div className="flex justify-between items-center">
+            <div className="text-primary-foreground">
+              <h1 className="text-2xl font-bold">Painel Administrativo</h1>
+              <p className="opacity-90">Dashboard, comunicados, encomendas, serviços e mais</p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/")}
+                className="text-primary-foreground hover:bg-white/20"
+              >
+                Ver App
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="text-primary-foreground hover:bg-white/20"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              className="text-primary-foreground hover:bg-white/20"
-            >
-              Ver App
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="text-primary-foreground hover:bg-white/20"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
+
+          {/* Menu de navegação dentro da faixa azul */}
+          <div className="mt-6">
+            <TabsList className="w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 bg-white/10 rounded-md p-2">
+              <TabsTrigger value="dashboard" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="comunicados" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <Megaphone className="h-4 w-4" />
+                Comunicados
+              </TabsTrigger>
+              <TabsTrigger value="encomendas" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <Package className="h-4 w-4" />
+                Encomendas
+              </TabsTrigger>
+              <TabsTrigger value="servicos" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <Wrench className="h-4 w-4" />
+                Serviços
+              </TabsTrigger>
+              <TabsTrigger value="agendamentos" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <Calendar className="h-4 w-4" />
+                Agendamentos
+              </TabsTrigger>
+              <TabsTrigger value="classificados" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <ShoppingBag className="h-4 w-4" />
+                Classificados
+              </TabsTrigger>
+              <TabsTrigger value="sugestoes" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <Lightbulb className="h-4 w-4" />
+                Sugestões
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
+                <MessageCircle className="h-4 w-4" />
+                Chat
+              </TabsTrigger>
+            </TabsList>
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="p-6 relative z-0">
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="fixed inset-x-0 top-0 z-10 w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-2 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 px-6 py-2 border-b shadow-sm">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="comunicados" className="flex items-center gap-2">
-              <Megaphone className="h-4 w-4" />
-              Comunicados
-            </TabsTrigger>
-            <TabsTrigger value="encomendas" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Encomendas
-            </TabsTrigger>
-            <TabsTrigger value="servicos" className="flex items-center gap-2">
-              <Wrench className="h-4 w-4" />
-              Serviços
-            </TabsTrigger>
-            <TabsTrigger value="agendamentos" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Agendamentos
-            </TabsTrigger>
-            <TabsTrigger value="classificados" className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Classificados
-            </TabsTrigger>
-            <TabsTrigger value="sugestoes" className="flex items-center gap-2">
-              <Lightbulb className="h-4 w-4" />
-              Sugestões
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              Chat
-            </TabsTrigger>
-          </TabsList>
-
+        {/* Conteúdo principal após a faixa azul */}
+        <div className="p-6 mt-2">
           <TabsContent value="dashboard" className="space-y-6">
             <AdminDashboard />
           </TabsContent>
@@ -130,8 +133,8 @@ const AdminPanel = () => {
           <TabsContent value="chat" className="space-y-6">
             <AdminChat />
           </TabsContent>
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     </div>
   );
 };
