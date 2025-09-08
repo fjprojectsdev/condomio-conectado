@@ -40,20 +40,13 @@ const AdminPanel = () => {
           <div className="flex justify-between items-center">
             <div className="text-primary-foreground">
               <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-              <p className="opacity-90">Dashboard, comunicados, encomendas, serviços e mais</p>
             </div>
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/")}
-                className="text-primary-foreground hover:bg-white/20"
-              >
-                Ver App
-              </Button>
+            <div className="flex">
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="text-primary-foreground hover:bg-white/20"
+                size="sm"
+                className="text-primary-foreground/80 hover:bg-white/10"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
@@ -63,7 +56,7 @@ const AdminPanel = () => {
 
           {/* Menu de navegação dentro da faixa azul */}
           <div className="mt-6">
-            <TabsList className="w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 bg-white/10 rounded-md p-2">
+            <TabsList className="w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 bg-white/10 rounded-md p-2 sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/10 border-b border-white/10">
               <TabsTrigger value="dashboard" className="flex flex-col items-center justify-center gap-1 text-primary-foreground">
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
@@ -101,7 +94,7 @@ const AdminPanel = () => {
         </div>
 
         {/* Conteúdo principal após a faixa azul */}
-        <div className="p-6 mt-2">
+        <div className="p-6 mt-4">
           <TabsContent value="dashboard" className="space-y-6">
             <AdminDashboard />
           </TabsContent>
