@@ -35,13 +35,13 @@ const Classificados = () => {
   const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
-    categoria: "venda" as const,
+    categoria: "venda" as 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel',
     preco: "",
     nome_contato: "",
     telefone: "",
     apartamento: "",
     bloco: "",
-    imagens: [] as string[] // Novo campo para imagens
+    imagens: [] as string[]
   });
   const { isAdminLoggedIn } = useAdmin();
   const { toast } = useToast();
@@ -75,12 +75,13 @@ const Classificados = () => {
     setFormData({
       titulo: "",
       descricao: "",
-      categoria: "venda",
+      categoria: "venda" as 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel',
       preco: "",
       nome_contato: "",
       telefone: "",
       apartamento: "",
-      bloco: ""
+      bloco: "",
+      imagens: []
     });
     setShowForm(false);
     setEditingId(null);
@@ -156,7 +157,8 @@ const Classificados = () => {
       nome_contato: classificado.nome_contato,
       telefone: classificado.telefone,
       apartamento: classificado.apartamento,
-      bloco: classificado.bloco || ""
+      bloco: classificado.bloco || "",
+      imagens: []
     });
     setEditingId(classificado.id);
     setShowForm(true);
@@ -298,7 +300,7 @@ const Classificados = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Categoria *</label>
-                  <Select value={formData.categoria} onValueChange={(value: 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel') => setFormData({...formData, categoria: value})}>
+                  <Select value={formData.categoria} onValueChange={(value) => setFormData({...formData, categoria: value as 'venda' | 'compra' | 'servico' | 'doacao' | 'troca' | 'aluguel'})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

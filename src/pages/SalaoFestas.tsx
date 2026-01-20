@@ -52,7 +52,7 @@ const SalaoFestas = () => {
         return;
       }
 
-      setAgendamentos(data || []);
+      setAgendamentos((data || []) as Agendamento[]);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
     } finally {
