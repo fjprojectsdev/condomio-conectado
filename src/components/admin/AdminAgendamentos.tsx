@@ -32,7 +32,7 @@ export const AdminAgendamentos = () => {
         .order("data_evento", { ascending: true });
       
       if (error) throw error;
-      setAgendamentos(data || []);
+      setAgendamentos((data || []) as Agendamento[]);
     } catch (err) {
       console.error("Erro ao buscar agendamentos:", err);
       toast({
